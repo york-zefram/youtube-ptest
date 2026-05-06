@@ -6,6 +6,11 @@
     <title>ZEFRAM LST</title>
     <style>
         :root {
+            --blue: #00f3ff;
+            --black: #000000;
+            --gray: #111111;
+            --dark-gray: #8b8b8b;
+
             --bg: #000000;
             --panel: #050505;
             --line: #1f1f1f;
@@ -14,15 +19,14 @@
             --muted: #8b8b8b;
             --accent: #00f3ff;
             --control-bg: #111111;
-
-            /* Existing-code compatibility */
-            --blue: var(--accent);
-            --black: var(--bg);
-            --gray: var(--control-bg);
-            --dark-gray: var(--muted);
         }
 
         body.light-mode {
+            --blue: #40a9ea;
+            --black: #f3f5f7;
+            --gray: #e6e9ed;
+            --dark-gray: #8f959c;
+
             --bg: #f3f5f7;
             --panel: #f3f5f7;
             --line: #d8dde3;
@@ -31,14 +35,8 @@
             --muted: #8f959c;
             --accent: #40a9ea;
             --control-bg: #e6e9ed;
-
-            /* Existing-code compatibility */
-            --blue: var(--accent);
-            --black: var(--bg);
-            --gray: var(--control-bg);
-            --dark-gray: var(--muted);
         }
-        html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: Inter, sans-serif, "Helvetica Neue", Arial; overflow: hidden; }
+        html, body { height: 100%; margin: 0; background: var(--black); color: white; font-family: sans-serif; overflow: hidden; }
         
         /* 全体レイアウト：Flexで各エリアを完全に分離 */
         .main-container { display: flex; flex-direction: column; height: 100vh; position: relative; }
@@ -48,7 +46,7 @@
         #player { width: 100%; height: 100%; transform: scale(1.01); }
 
         /* 2. 再生コントロール */
-        .player-controls { display: flex; align-items: center; height: 90px; padding: 0 20px; background: var(--bg); gap: 20px; flex-shrink: 0; position: relative; z-index: 10; }
+        .player-controls { display: flex; align-items: center; height: 90px; padding: 0 20px; background: var(--black); gap: 20px; flex-shrink: 0; position: relative; z-index: 10; }
         #play-pause-btn { font-size: 2rem; color: var(--blue); cursor: pointer; user-select: none; width: 45px; text-align: center; }
         
         .seek-container { flex-grow: 1; position: relative; height: 100%; display: flex; align-items: center; }
@@ -61,7 +59,7 @@
         #total-time { right: 0; }
 
         /* 3. 検索エリア */
-        .search-area { padding: 10px 0 10px 0; background: var(--bg); flex-shrink: 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; position: relative; z-index: 20; }
+        .search-area { padding: 10px 0 10px 0; background: var(--black); flex-shrink: 0; border-bottom: 1px solid #222; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 20; }
         
         .rotary-container { width: 100%; overflow-x: auto; display: flex; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: 10px 0; scroll-behavior: smooth; }
         .rotary-container::-webkit-scrollbar { display: none; }
@@ -69,47 +67,49 @@
 
         .mode-btn { 
             scroll-snap-align: center; flex-shrink: 0; width: 180px; font-size: 0.6rem; padding: 8px 0; margin: 0 10px;
-            background: var(--control-bg); border: 1px solid var(--line-strong); border-radius: 20px; color: var(--muted); font-weight: bold;
+            background: var(--gray); border: 1px solid #333; border-radius: 20px; color: #555; font-weight: bold;
             transition: 0.3s; white-space: nowrap; cursor: pointer; text-align: center;
         }
-        .mode-btn.active { color: var(--accent); border-color: var(--accent); background: var(--bg); text-shadow: none; transform: scale(1.08); }
+        .mode-btn.active { color: var(--blue); border-color: var(--blue); background: #111; text-shadow: 0 0 8px var(--blue); transform: scale(1.1); }
 
         .bottom-row { width: 92%; display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+        #theme-trigger { cursor: pointer; font-size: 1.05rem; transition: 0.3s; color: var(--dark-gray); opacity: 0.7; flex-shrink: 0; width: 24px; text-align: center; }
+        #theme-trigger.active { color: var(--blue); opacity: 1; }
         #key-trigger { cursor: pointer; font-size: 1.2rem; transition: 0.3s; color: var(--dark-gray); opacity: 0.6; flex-shrink: 0; }
         #key-trigger.active { color: var(--blue) !important; opacity: 1; text-shadow: 0 0 12px var(--blue); }
 
         .input-wrapper { flex-grow: 1; position: relative; }
-        #search-input { background: var(--control-bg); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 1rem; color: var(--text); width: 100%; padding: 10px 14px; outline: none; box-sizing: border-box; }
-        #search-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 0 12px; border-radius: 999px; font-size: 0.8rem; font-weight: bold; cursor: pointer; height: 40px; line-height: 40px; flex-shrink: 0; }
-        #status { position: absolute; left: 0; top: 100%; font-size: 0.55rem; color: var(--muted); margin-top: 4px; letter-spacing: 1px; }
+        #search-input { background: var(--gray); border: 1px solid #333; border-radius: 4px; font-size: 1rem; color: white; width: 100%; padding: 10px; outline: none; box-sizing: border-box; }
+        #search-btn { background: transparent; color: var(--blue); border: 1px solid var(--blue); padding: 0 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; height: 40px; line-height: 40px; flex-shrink: 0; }
+        #status { position: absolute; left: 0; top: 100%; font-size: 0.55rem; color: #555; margin-top: 4px; letter-spacing: 1px; }
 
         /* 4. ナビゲーション固定エリア（揺れ防止のため独立） */
         .fixed-nav-container { 
-            width: 100%; height: 45px; flex-shrink: 0; background: var(--bg); 
+            width: 100%; height: 45px; flex-shrink: 0; background: var(--black); 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 20px; border-bottom: 1px solid var(--line); box-sizing: border-box;
+            padding: 0 20px; border-bottom: 1px solid #111; box-sizing: border-box;
             transform: translateZ(0); /* GPUレイヤー固定 */
         }
         .nav-link { font-size: 0.85rem; font-weight: bold; color: var(--blue); cursor: pointer; letter-spacing: 1px; -webkit-font-smoothing: antialiased; }
         .nav-link:active { opacity: 0.5; }
 
         /* 5. スクロールリストエリア */
-        #lst { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--bg); }
+        #lst { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--black); }
         .list-inner { padding: 0 15px 50px 15px; }
 
         /* 共通パーツ */
         #setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .z-panel { width: 85%; max-width: 360px; padding: 40px 20px; border: 1px solid var(--accent); background: var(--bg); text-align: center; }
+        .z-panel { width: 85%; max-width: 360px; padding: 40px 20px; border: 1px solid var(--blue); background: var(--black); text-align: center; }
         .z-btn { background: transparent; color: var(--blue); border: 1px solid var(--blue); padding: 15px; width: 100%; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-bottom: 20px; }
-        .setup-input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line-strong); color: var(--accent); font-family: monospace; text-align: center; outline: none; box-sizing: border-box; }
+        .setup-input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: var(--blue); font-family: monospace; text-align: center; outline: none; box-sizing: border-box; }
 
         .section-label { font-size: 0.65rem; color: var(--blue); font-weight: bold; margin: 15px 0 10px; border-left: 2px solid var(--blue); padding-left: 8px; letter-spacing: 2px; }
-        .row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
-        .type-tag { width: 40px; font-size: 0.45rem; padding: 2px 0; background: var(--control-bg); color: var(--muted); border-radius: 2px; flex-shrink: 0; text-align: center; margin-right: 10px; }
+        .row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #111; cursor: pointer; }
+        .type-tag { width: 40px; font-size: 0.45rem; padding: 2px 0; background: #222; color: #888; border-radius: 2px; flex-shrink: 0; text-align: center; margin-right: 10px; }
         .thumb-box { width: 45px; height: 45px; flex-shrink: 0; margin-right: 12px; border-radius: 2px; overflow: hidden; }
         .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
-        .title { flex-grow: 1; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-        .duration { font-size: 0.7rem; color: var(--muted); font-family: monospace; margin-left: 10px; }
+        .title { flex-grow: 1; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ddd; }
+        .duration { font-size: 0.7rem; color: #555; font-family: monospace; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -148,6 +148,7 @@
                 </div>
             </div>
             <div class="bottom-row">
+                <div id="theme-trigger" onclick="togglePlayerTheme()">☀</div>
                 <div id="key-trigger" onclick="toggleSetup()">🔑</div>
                 <div class="input-wrapper">
                     <input type="text" id="search-input" placeholder="" onkeydown="if(event.key==='Enter') doSearch()">
@@ -185,10 +186,28 @@
         let currentQuery = "";
 
         window.addEventListener('DOMContentLoaded', () => {
+            applyPlayerTheme(localStorage.getItem('ZEFRAM_PLAYER_THEME') || 'dark');
             updateKeyStatus();
             initSeekBar();
             setTimeout(centerMusic, 150);
         });
+
+        function applyPlayerTheme(theme) {
+            const nextTheme = theme === 'light' ? 'light' : 'dark';
+            document.body.classList.toggle('light-mode', nextTheme === 'light');
+            localStorage.setItem('ZEFRAM_PLAYER_THEME', nextTheme);
+
+            const trigger = document.getElementById('theme-trigger');
+            if (trigger) {
+                trigger.classList.toggle('active', nextTheme === 'light');
+                trigger.innerText = nextTheme === 'light' ? '☾' : '☀';
+            }
+        }
+
+        function togglePlayerTheme() {
+            const isLight = document.body.classList.contains('light-mode');
+            applyPlayerTheme(isLight ? 'dark' : 'light');
+        }
 
         function centerMusic() {
             const rotary = document.getElementById('rotary');
