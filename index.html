@@ -468,28 +468,130 @@
             return m.toString().padStart(2, '0') + ":" + rs.toString().padStart(2, '0');
         }
 
+        function buildYoutubeSearchQuery(baseQuery) {
+            const rawQuery = (baseQuery || '').trim();
+            const genreText = selectedGenres.join(' ').trim();
+
+            if (currentContentType === 'video') {
+                return buildVideoSearchQuery(rawQuery, genreText);
+            }
+
+            return buildMusicSearchQuery(rawQuery, genreText);
+        }
+
+        function buildMusicSearchQuery(rawQuery, genreText) {
+            const parts = [];
+
+            if (rawQuery) parts.push(rawQuery);
+            if (genreText) parts.push(genreText);
+
+            const joined = parts.join(' ').trim();
+
+            if (!joined) return '';
+
+            return `${joined} - Topic`;
+        }
+
+        function buildVideoSearchQuery(rawQuery, genreText) {
+            const parts = [];
+
+            if (rawQuery) parts.push(rawQuery);
+
+            const videoIntent = convertVideoGenreToSearchWords(genreText);
+
+            if (videoIntent) {
+                parts.push(videoIntent);
+            }
+
+            return parts.join(' ').trim();
+        }
+
+        function convertVideoGenreToSearchWords(genreText) {
+            if (!genreText) {
+                return 'official music video';
+            }
+
+            const normalized = genreText.toUpperCase();
+
+            if (normalized.includes('MV') || normalized.includes('PV')) {
+                return 'official MV official PV official music video';
+            }
+
+            if (normalized.includes('DANCE')) {
+                return 'dance practice';
+            }
+
+            if (normalized.includes('LIVE')) {
+                return 'live performance';
+            }
+
+            if (normalized.includes('PERFORMANCE')) {
+                return 'performance video';
+            }
+
+            if (normalized.includes('PRACTICE')) {
+                return 'practice video';
+            }
+
+            if (normalized.includes('CHOREOGRAPHY')) {
+                return 'choreography dance';
+            }
+
+            if (normalized.includes('OFFICIAL')) {
+                return 'official video';
+            }
+
+            return genreText;
+        }
+
         async function doSearch(isNext = false) {
             if (!API_KEY) return toggleSetup();
-            const q = document.getElementById('search-input').value;
+
+            const q = document.getElementById('search-input').value.trim();
+
             if (!q && selectedGenres.length === 0) return;
-            if (!isNext) { nextPageToken = ""; currentQuery = q; }
+
+            if (!isNext) {
+                nextPageToken = "";
+                currentQuery = q;
+            }
+
             document.getElementById('status').innerText = isNext ? "LOADING NEXT..." : "SEARCHING...";
+
             try {
-                let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(currentQuery + " - Topic")}&maxResults=50&key=${API_KEY}`;
-                if (isNext && nextPageToken) url += `&pageToken=${nextPageToken}`;
+                const searchQuery = buildYoutubeSearchQuery(currentQuery);
+
+                let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&maxResults=50&key=${API_KEY}`;
+
+                if (isNext && nextPageToken) {
+                    url += `&pageToken=${nextPageToken}`;
+                }
+
                 const res = await fetch(url);
                 const data = await res.json();
+
                 nextPageToken = data.nextPageToken || "";
-                const videoIds = data.items.filter(i => i.id.kind === 'youtube#video').map(i => i.id.videoId).join(',');
+
+                const videoIds = data.items
+                    .filter(i => i.id.kind === 'youtube#video')
+                    .map(i => i.id.videoId)
+                    .join(',');
+
                 let durationMap = {};
+
                 if (videoIds) {
                     const dRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${API_KEY}`);
                     const dData = await dRes.json();
-                    dData.items.forEach(i => { durationMap[i.id] = parseDuration(i.contentDetails.duration); });
+                    dData.items.forEach(i => {
+                        durationMap[i.id] = parseDuration(i.contentDetails.duration);
+                    });
                 }
+
                 renderList(data.items, durationMap);
                 document.getElementById('status').innerText = "";
-            } catch (e) { document.getElementById('status').innerText = "ERROR"; }
+            } catch (e) {
+                document.getElementById('status').innerText = "ERROR";
+            }
         }
 
         function renderList(items, durationMap) {
