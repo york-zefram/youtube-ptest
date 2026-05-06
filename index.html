@@ -193,6 +193,12 @@
             text-overflow: ellipsis;
             cursor: pointer;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            appearance: none;
+            -webkit-appearance: none;
             transition:
                 color 0.25s ease,
                 border-color 0.25s ease,
@@ -558,6 +564,7 @@
         let genreDragStartX = 0;
         let genreDragStartScrollLeft = 0;
         let genreLastX = 0;
+        let genreLastTime = 0;
         let genreVelocity = 0;
         let genreMomentumFrame = null;
 
@@ -618,17 +625,23 @@
             const activeBtn = targetEl || document.querySelector('.mode-btn.active');
 
             if (!rotary || !activeBtn) return;
+            if (rotary.offsetWidth <= 0 || activeBtn.offsetWidth <= 0) return;
 
             const move = () => {
-                rotary.scrollLeft =
-                    activeBtn.offsetLeft -
-                    (rotary.offsetWidth / 2) +
-                    (activeBtn.offsetWidth / 2);
+                const rotaryRect = rotary.getBoundingClientRect();
+                const activeRect = activeBtn.getBoundingClientRect();
+                const buttonCenter =
+                    activeRect.left -
+                    rotaryRect.left +
+                    rotary.scrollLeft +
+                    activeRect.width / 2;
+
+                rotary.scrollLeft = buttonCenter - rotary.clientWidth / 2;
             };
 
             requestAnimationFrame(move);
             setTimeout(move, 80);
-            setTimeout(move, 180);
+            setTimeout(move, 220);
         }
 
         function renderGenreButtons(type) {
@@ -821,6 +834,10 @@
             const rotary = document.getElementById('rotary');
             if (!rotary) return;
 
+            const dragSpeed = 1.35;
+            const friction = 0.94;
+            const minVelocity = 0.05;
+
             const stopMomentum = () => {
                 if (genreMomentumFrame) {
                     cancelAnimationFrame(genreMomentumFrame);
@@ -829,19 +846,16 @@
             };
 
             const startMomentum = () => {
-                const friction = 0.92;
-                const minVelocity = 0.08;
-
                 const step = () => {
-                    if (Math.abs(genreVelocity) < minVelocity) {
-                        genreMomentumFrame = null;
-                        setTimeout(() => centerActiveGenre(), 120);
+                    rotary.scrollLeft -= genreVelocity;
+                    genreVelocity *= friction;
+
+                    if (Math.abs(genreVelocity) > minVelocity) {
+                        genreMomentumFrame = requestAnimationFrame(step);
                         return;
                     }
 
-                    rotary.scrollLeft -= genreVelocity;
-                    genreVelocity *= friction;
-                    genreMomentumFrame = requestAnimationFrame(step);
+                    genreMomentumFrame = null;
                 };
 
                 genreMomentumFrame = requestAnimationFrame(step);
@@ -852,6 +866,7 @@
                 isGenreDragging = false;
                 genreDragStartX = event.clientX;
                 genreLastX = event.clientX;
+                genreLastTime = performance.now();
                 genreDragStartScrollLeft = rotary.scrollLeft;
                 genreVelocity = 0;
 
@@ -865,17 +880,21 @@
             rotary.addEventListener('pointermove', (event) => {
                 if (!genrePointerDown) return;
 
+                const now = performance.now();
                 const dx = event.clientX - genreDragStartX;
-                const moveX = event.clientX - genreLastX;
-
-                genreLastX = event.clientX;
-                genreVelocity = moveX * 1.9;
+                const frameDx = event.clientX - genreLastX;
+                const dt = Math.max(1, now - genreLastTime);
 
                 if (Math.abs(dx) > 4) {
                     isGenreDragging = true;
                     rotary.classList.add('dragging');
-                    rotary.scrollLeft = genreDragStartScrollLeft - dx;
                 }
+
+                rotary.scrollLeft = genreDragStartScrollLeft - dx * dragSpeed;
+                genreVelocity = (frameDx / dt) * 14 * dragSpeed;
+
+                genreLastX = event.clientX;
+                genreLastTime = now;
             });
 
             rotary.addEventListener('pointerup', (event) => {
@@ -888,23 +907,19 @@
                     rotary.releasePointerCapture(event.pointerId);
                 } catch (e) {}
 
-                if (isGenreDragging) {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    setTimeout(() => {
-                        isGenreDragging = false;
-                    }, 80);
-
+                if (Math.abs(genreVelocity) > minVelocity) {
                     startMomentum();
                 }
+
+                setTimeout(() => {
+                    isGenreDragging = false;
+                }, 140);
             });
 
             rotary.addEventListener('pointercancel', () => {
                 genrePointerDown = false;
                 isGenreDragging = false;
                 rotary.classList.remove('dragging');
-                setTimeout(() => centerActiveGenre(), 120);
             });
 
             rotary.addEventListener('click', (event) => {
@@ -913,88 +928,6 @@
                     event.stopPropagation();
                 }
             }, true);
-        }
-
-        function formatTime(s) {
-            if (!s || isNaN(s)) return "00:00";
-            const m = Math.floor(s / 60), rs = Math.floor(s % 60);
-            return m.toString().padStart(2, '0') + ":" + rs.toString().padStart(2, '0');
-        }
-
-        function buildYoutubeSearchQuery(baseQuery) {
-            const rawQuery = (baseQuery || '').trim();
-            const genreText = selectedGenres.join(' ').trim();
-
-            if (currentContentType === 'video') {
-                return buildVideoSearchQuery(rawQuery, genreText);
-            }
-
-            return buildMusicSearchQuery(rawQuery, genreText);
-        }
-
-        function buildMusicSearchQuery(rawQuery, genreText) {
-            const parts = [];
-
-            if (rawQuery) parts.push(rawQuery);
-            if (genreText) parts.push(genreText);
-
-            const joined = parts.join(' ').trim();
-
-            if (!joined) return '';
-
-            return `${joined} - Topic`;
-        }
-
-        function buildVideoSearchQuery(rawQuery, genreText) {
-            const parts = [];
-
-            if (rawQuery) parts.push(rawQuery);
-
-            const videoIntent = convertVideoGenreToSearchWords(genreText);
-
-            if (videoIntent) {
-                parts.push(videoIntent);
-            }
-
-            return parts.join(' ').trim();
-        }
-
-        function convertVideoGenreToSearchWords(genreText) {
-            if (!genreText) {
-                return 'official music video';
-            }
-
-            const normalized = genreText.toUpperCase();
-
-            if (normalized.includes('MV') || normalized.includes('PV')) {
-                return 'official MV official PV official music video';
-            }
-
-            if (normalized.includes('DANCE')) {
-                return 'dance practice';
-            }
-
-            if (normalized.includes('LIVE')) {
-                return 'live performance';
-            }
-
-            if (normalized.includes('PERFORMANCE')) {
-                return 'performance video';
-            }
-
-            if (normalized.includes('PRACTICE')) {
-                return 'practice video';
-            }
-
-            if (normalized.includes('CHOREOGRAPHY')) {
-                return 'choreography dance';
-            }
-
-            if (normalized.includes('OFFICIAL')) {
-                return 'official video';
-            }
-
-            return genreText;
         }
 
         async function doSearch(isNext = false) {
