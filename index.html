@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Z-BUDDY Local YouTube Player</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000000;
+      }
+
+      #player {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+      }
+
+      #diagnosticBar {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 8px;
+        z-index: 9999;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 10px;
+        border: 1px solid rgba(0, 243, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.58);
+        color: #00f3ff;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        pointer-events: none;
+        opacity: 0.72;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="player"></div>
+    <div id="diagnosticBar">PLAYER BOOTING</div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+      let player = null;
+      let playerReady = false;
+      let timeTimer = null;
+      let loadTimeout = null;
+      let lastVideoId = "";
+      let pendingLoad = null;
+
+      const LOCAL_ORIGIN = "http://127.0.0.1:37891";
+      const LOCAL_INDEX = "http://127.0.0.1:37891/index.html";
+
+      const STATE_NAMES = {
+        [-1]: "UNSTARTED",
+        0: "ENDED",
+        1: "PLAYING",
+        2: "PAUSED",
+        3: "BUFFERING",
+        5: "CUED"
+      };
+
+      function setDiagnostic(text) {
+        const bar = document.getElementById("diagnosticBar");
+        if (bar) bar.textContent = text;
+      }
+
+      function postToParent(type, payload = {}) {
+        window.parent.postMessage(
+          {
+            source: "zbuddy-youtube-player",
+            type,
+            ...payload
+          },
+          window.location.origin
+        );
+      }
+
+      function notify(type, payload = {}) {
+        postToParent(type, payload);
+      }
+
+      function clearLoadTimeout() {
+        if (loadTimeout) {
+          clearTimeout(loadTimeout);
+          loadTimeout = null;
+        }
+      }
+
+      function startLoadTimeout(videoId) {
+        clearLoadTimeout();
+        loadTimeout = setTimeout(() => {
+          const state = player && player.getPlayerState ? player.getPlayerState() : null;
+          const stateName = STATE_NAMES[state] || String(state);
+          setDiagnostic(`PLAYER TIMEOUT / ${stateName}`);
+          notify("timeout", {
+            videoId,
+            state,
+            stateName
+          });
+        }, 15000);
+      }
+
+      function syncTime() {
+        if (!playerReady || !player || !player.getCurrentTime) return;
+
+        const currentTime = Number(player.getCurrentTime()) || 0;
+        const duration = Number(player.getDuration()) || 0;
+
+        notify("time", {
+          currentTime,
+          duration
+        });
+      }
+
+      function startTimeSync() {
+        if (timeTimer) clearInterval(timeTimer);
+        timeTimer = setInterval(syncTime, 500);
+        syncTime();
+      }
+
+      function loadVideo(videoId) {
+        const nextVideoId = String(videoId || "").trim();
+        if (!nextVideoId) return;
+
+        if (!playerReady || !player) {
+          pendingLoad = nextVideoId;
+          setDiagnostic(`PENDING / ${nextVideoId}`);
+          return;
+        }
+
+        lastVideoId = nextVideoId;
+        setDiagnostic(`LOADING / ${nextVideoId}`);
+        notify("loading", { videoId: nextVideoId });
+        startLoadTimeout(nextVideoId);
+        player.loadVideoById(nextVideoId);
+        startTimeSync();
+      }
+
+      function onYouTubeIframeAPIReady() {
+        setDiagnostic("IFRAME API READY");
+
+        player = new YT.Player("player", {
+          width: "100%",
+          height: "100%",
+          videoId: "",
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            enablejsapi: 1,
+            origin: LOCAL_ORIGIN,
+            widget_referrer: LOCAL_INDEX
+          },
+          events: {
+            onReady: () => {
+              playerReady = true;
+              setDiagnostic("PLAYER READY");
+              notify("ready", {
+                origin: window.location.origin,
+                href: window.location.href
+              });
+
+              if (pendingLoad) {
+                const pending = pendingLoad;
+                pendingLoad = null;
+                loadVideo(pending);
+              }
+            },
+            onStateChange: (event) => {
+              const stateName = STATE_NAMES[event.data] || String(event.data);
+              setDiagnostic(`STATE / ${stateName}`);
+              notify("state", {
+                state: event.data,
+                stateName
+              });
+
+              if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.CUED) {
+                clearLoadTimeout();
+              }
+
+              startTimeSync();
+            },
+            onError: (event) => {
+              clearLoadTimeout();
+              setDiagnostic(`PLAYER ERROR / ${event.data}`);
+              notify("error", {
+                code: event.data,
+                videoId: lastVideoId
+              });
+            }
+          }
+        });
+      }
+
+      window.addEventListener("message", (event) => {
+        const message = event.data || {};
+        if (message.source !== "zbuddy-main") return;
+
+        if (message.type === "load") {
+          loadVideo(message.videoId);
+          return;
+        }
+
+        if (!playerReady || !player) {
+          setDiagnostic("PLAYER NOT READY");
+          notify("notReady", { type: message.type });
+          return;
+        }
+
+        if (message.type === "play") {
+          player.playVideo();
+          startTimeSync();
+          return;
+        }
+
+        if (message.type === "pause") {
+          player.pauseVideo();
+          syncTime();
+          return;
+        }
+
+        if (message.type === "toggle") {
+          const state = player.getPlayerState();
+          if (state === YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+          } else {
+            player.playVideo();
+            startTimeSync();
+          }
+          return;
+        }
+
+        if (message.type === "seek") {
+          player.seekTo(Number(message.seconds) || 0, true);
+          syncTime();
+          return;
+        }
+
+        if (message.type === "getTime") {
+          syncTime();
+        }
+      });
+
+      setTimeout(() => {
+        if (!playerReady) {
+          setDiagnostic("IFRAME API TIMEOUT");
+          notify("timeout", {
+            stage: "iframe-api-ready"
+          });
+        }
+      }, 15000);
+    </script>
+  </body>
+</html>
