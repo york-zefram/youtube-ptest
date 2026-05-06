@@ -42,7 +42,18 @@
         .main-container { width: 100%; height: 100vh; position: relative; overflow: hidden; background: var(--black); }
         .player-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr); width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; background: var(--black); }
         .left-player-column { display: grid; grid-template-rows: minmax(0, 1fr) 90px; min-width: 0; min-height: 0; overflow: hidden; background: #000; border-right: 1px solid #333; }
-        .right-genre-column { display: grid; grid-template-rows: auto auto minmax(0, 1fr); width: 100%; max-width: 100%; min-width: 0; min-height: 0; overflow: hidden; background: var(--black); box-sizing: border-box; }
+        .right-genre-column { display: grid; grid-template-rows: 74px 96px 88px minmax(0, 1fr); width: 100%; max-width: 100%; min-width: 0; min-height: 0; overflow: hidden; background: var(--black); box-sizing: border-box; }
+
+        .panel-section { min-width: 0; min-height: 0; overflow: hidden; border-bottom: 1px solid #222; box-sizing: border-box; }
+        .panel-title { height: 22px; display: flex; align-items: center; justify-content: center; color: var(--dark-gray); font-size: 0.55rem; font-weight: bold; letter-spacing: 0.18em; text-transform: uppercase; line-height: 22px; user-select: none; }
+        .content-type-panel { display: grid; grid-template-rows: 22px minmax(0, 1fr); align-items: center; padding: 7px 14px 10px; }
+        .content-type-row { display: flex; align-items: center; justify-content: center; gap: 18px; min-width: 0; }
+        .content-type-btn { width: 78px; height: 28px; border: 1px solid #333; border-radius: 999px; background: var(--gray); color: var(--dark-gray); font-size: 0.58rem; font-weight: bold; letter-spacing: 0.12em; cursor: default; }
+        .content-type-btn.active { color: var(--blue); border-color: var(--blue); background: var(--black); }
+        .genre-panel { display: grid; grid-template-rows: 22px minmax(0, 1fr); align-items: center; padding: 8px 0 10px; }
+        .search-panel { display: grid; grid-template-rows: 22px minmax(0, 1fr); align-items: center; padding: 8px 0 10px; }
+        .result-panel { display: grid; grid-template-rows: 30px auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; background: var(--black); }
+        .result-panel-title { border-bottom: 1px solid #111; }
         
         /* 1. ビデオエリア */
         #video-container { width: 100%; height: 100%; min-height: 0; background: #000; flex-shrink: 0; border-bottom: 1px solid #333; position: relative; overflow: hidden; }
@@ -62,7 +73,22 @@
         #total-time { right: 0; }
 
         /* 3. 検索エリア */
-        .search-area { padding: 10px 0 10px 0; background: var(--black); flex-shrink: 0; border-bottom: 1px solid #222; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 20; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; }
+        .search-area {
+    padding: 0;
+    background: var(--black);
+    flex-shrink: 0;
+    border-bottom: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
         
         .rotary-container { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow-x: auto; overflow-y: hidden; display: flex; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: 10px 0; scroll-behavior: smooth; }
         .rotary-container::-webkit-scrollbar { display: none; }
@@ -107,10 +133,12 @@
             .left-player-column { display: flex; flex-direction: column; border-right: none; border-bottom: 1px solid #333; flex: 0 0 auto; min-height: 0; }
             #video-container { width: 100%; aspect-ratio: 16 / 9; height: auto; max-height: 35vh; flex-shrink: 0; }
             .player-controls { height: 90px; flex-shrink: 0; }
-            .right-genre-column { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
-            .search-area { flex-shrink: 0; }
+            .right-genre-column { display: grid; grid-template-rows: 70px 92px 84px minmax(0, 1fr); flex: 1 1 auto; min-height: 0; overflow: hidden; }
+            .content-type-panel { padding: 6px 14px 9px; }
+            .genre-panel { padding: 7px 0 9px; }
+            .search-panel { padding: 7px 0 9px; }
             .fixed-nav-container { flex-shrink: 0; }
-            #lst { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+            #lst { min-height: 0; overflow-y: auto; }
         }
 
         /* 共通パーツ */
@@ -149,7 +177,16 @@
             </div>
 
             <div class="right-genre-column">
-                <div class="search-area">
+                <div class="content-type-panel panel-section">
+                    <div class="panel-title">CONTENT TYPE</div>
+                    <div class="content-type-row">
+                        <button class="content-type-btn active" type="button">MUSIC</button>
+                        <button class="content-type-btn" type="button">VIDEO</button>
+                    </div>
+                </div>
+
+                <div class="genre-panel panel-section">
+                    <div class="panel-title">GENRE</div>
                     <div class="rotary-container" id="rotary">
                         <div class="rotary-track" id="track">
                             <div class="mode-btn" data-val="Latin / Reggaeton" onclick="toggleGenre(this)">Latin / Reggaeton</div>
@@ -167,6 +204,10 @@
                             <div class="mode-btn" data-val="R&B / Soul" onclick="toggleGenre(this)">R&B / Soul</div>
                         </div>
                     </div>
+                </div>
+
+                <div class="search-area search-panel panel-section">
+                    <div class="panel-title">SEARCH</div>
                     <div class="bottom-row">
                         <div id="theme-trigger" onclick="togglePlayerTheme()">☀</div>
                         <div id="key-trigger" onclick="toggleSetup()">🔑</div>
@@ -178,13 +219,15 @@
                     </div>
                 </div>
 
-                <div class="fixed-nav-container" id="fixed-nav" style="display:none;">
-                    <div class="nav-link" onclick="restoreLastSearch()">ALBUM / BACK</div>
-                    <div class="nav-link" onclick="doSearch(true)">↻ REFRESH</div>
-                </div>
-
-                <div id="lst">
-                    <div class="list-inner" id="list-inner"></div>
+                <div class="result-panel">
+                    <div class="panel-title result-panel-title">RESULT</div>
+                    <div class="fixed-nav-container" id="fixed-nav" style="display:none;">
+                        <div class="nav-link" onclick="restoreLastSearch()">ALBUM / BACK</div>
+                        <div class="nav-link" onclick="doSearch(true)">↻ REFRESH</div>
+                    </div>
+                    <div id="lst">
+                        <div class="list-inner" id="list-inner"></div>
+                    </div>
                 </div>
             </div>
         </div>
