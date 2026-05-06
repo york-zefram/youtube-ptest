@@ -39,10 +39,13 @@
         html, body { height: 100%; margin: 0; background: var(--black); color: white; font-family: sans-serif; overflow: hidden; }
         
         /* 全体レイアウト：Flexで各エリアを完全に分離 */
-        .main-container { display: flex; flex-direction: column; height: 100vh; position: relative; }
+        .main-container { width: 100%; height: 100vh; position: relative; overflow: hidden; background: var(--black); }
+        .player-layout { display: grid; grid-template-columns: minmax(420px, 1.35fr) minmax(320px, 0.85fr); width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; background: var(--black); }
+        .left-player-column { display: grid; grid-template-rows: minmax(0, 1fr) 90px; min-width: 0; min-height: 0; overflow: hidden; background: #000; border-right: 1px solid #333; }
+        .right-genre-column { display: grid; grid-template-rows: auto auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; background: var(--black); }
         
         /* 1. ビデオエリア */
-        #video-container { width: 100%; aspect-ratio: 16 / 9; max-height: 35vh; background: #000; flex-shrink: 0; border-bottom: 1px solid #333; position: relative; overflow: hidden; }
+        #video-container { width: 100%; height: 100%; min-height: 0; background: #000; flex-shrink: 0; border-bottom: 1px solid #333; position: relative; overflow: hidden; }
         #player { width: 100%; height: 100%; transform: scale(1.01); }
 
         /* 2. 再生コントロール */
@@ -94,8 +97,20 @@
         .nav-link:active { opacity: 0.5; }
 
         /* 5. スクロールリストエリア */
-        #lst { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--black); }
+        #lst { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--black); }
         .list-inner { padding: 0 15px 50px 15px; }
+
+        @media (max-width: 980px) {
+            .main-container { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+            .player-layout { display: flex; flex-direction: column; height: 100vh; min-height: 0; overflow: hidden; }
+            .left-player-column { display: flex; flex-direction: column; border-right: none; border-bottom: 1px solid #333; flex: 0 0 auto; min-height: 0; }
+            #video-container { width: 100%; aspect-ratio: 16 / 9; height: auto; max-height: 35vh; flex-shrink: 0; }
+            .player-controls { height: 90px; flex-shrink: 0; }
+            .right-genre-column { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+            .search-area { flex-shrink: 0; }
+            .fixed-nav-container { flex-shrink: 0; }
+            #lst { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+        }
 
         /* 共通パーツ */
         #setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; }
@@ -115,56 +130,62 @@
 <body>
 
     <div class="main-container">
-        <div id="video-container"><div id="player"></div></div>
+        <div class="player-layout">
+            <div class="left-player-column">
+                <div id="video-container"><div id="player"></div></div>
 
-        <div class="player-controls">
-            <div id="play-pause-btn" onclick="togglePlay()">II</div>
-            <div class="seek-container">
-                <div class="seek-bar-wrapper" id="seek-bar">
-                    <div id="seek-fill"></div>
-                    <div id="seek-dot"></div>
-                </div>
-                <span id="current-time" class="time-label">00:00</span>
-                <span id="total-time" class="time-label">00:00</span>
-            </div>
-        </div>
-
-        <div class="search-area">
-            <div class="rotary-container" id="rotary">
-                <div class="rotary-track" id="track">
-                    <div class="mode-btn" data-val="Latin / Reggaeton" onclick="toggleGenre(this)">Latin / Reggaeton</div>
-                    <div class="mode-btn" data-val="EDM / Dance" onclick="toggleGenre(this)">EDM / Dance</div>
-                    <div class="mode-btn" data-val="Rock / Alternative" onclick="toggleGenre(this)">Rock / Alternative</div>
-                    <div class="mode-btn" data-val="Country" onclick="toggleGenre(this)">Country</div>
-                    <div class="mode-btn" data-val="Jazz / Smooth Jazz" onclick="toggleGenre(this)">Jazz / Smooth Jazz</div>
-                    <div class="mode-btn" data-val="Jazzy Hip Hop / Chill Out" onclick="toggleGenre(this)">Jazzy Hip Hop / Chill Out</div>
-                    <div id="m-music" class="mode-btn active" data-val="MUSIC" onclick="toggleGenre(this)">MUSIC</div>
-                    <div class="mode-btn" data-val="MIX" onclick="toggleGenre(this)">MIX</div>
-                    <div class="mode-btn" data-val="Lo-fi Hip Hop / Chillhop" onclick="toggleGenre(this)">Lo-fi Hip Hop / Chillhop</div>
-                    <div class="mode-btn" data-val="Indie / Bedroom Pop" onclick="toggleGenre(this)">Indie / Bedroom Pop</div>
-                    <div class="mode-btn" data-val="Hip Hop / Rap" onclick="toggleGenre(this)">Hip Hop / Rap</div>
-                    <div class="mode-btn" data-val="Pop / Modern Pop" onclick="toggleGenre(this)">Pop / Modern Pop</div>
-                    <div class="mode-btn" data-val="R&B / Soul" onclick="toggleGenre(this)">R&B / Soul</div>
+                <div class="player-controls">
+                    <div id="play-pause-btn" onclick="togglePlay()">II</div>
+                    <div class="seek-container">
+                        <div class="seek-bar-wrapper" id="seek-bar">
+                            <div id="seek-fill"></div>
+                            <div id="seek-dot"></div>
+                        </div>
+                        <span id="current-time" class="time-label">00:00</span>
+                        <span id="total-time" class="time-label">00:00</span>
+                    </div>
                 </div>
             </div>
-            <div class="bottom-row">
-                <div id="theme-trigger" onclick="togglePlayerTheme()">☀</div>
-                <div id="key-trigger" onclick="toggleSetup()">🔑</div>
-                <div class="input-wrapper">
-                    <input type="text" id="search-input" placeholder="" onkeydown="if(event.key==='Enter') doSearch()">
-                    <div id="status"></div>
+
+            <div class="right-genre-column">
+                <div class="search-area">
+                    <div class="rotary-container" id="rotary">
+                        <div class="rotary-track" id="track">
+                            <div class="mode-btn" data-val="Latin / Reggaeton" onclick="toggleGenre(this)">Latin / Reggaeton</div>
+                            <div class="mode-btn" data-val="EDM / Dance" onclick="toggleGenre(this)">EDM / Dance</div>
+                            <div class="mode-btn" data-val="Rock / Alternative" onclick="toggleGenre(this)">Rock / Alternative</div>
+                            <div class="mode-btn" data-val="Country" onclick="toggleGenre(this)">Country</div>
+                            <div class="mode-btn" data-val="Jazz / Smooth Jazz" onclick="toggleGenre(this)">Jazz / Smooth Jazz</div>
+                            <div class="mode-btn" data-val="Jazzy Hip Hop / Chill Out" onclick="toggleGenre(this)">Jazzy Hip Hop / Chill Out</div>
+                            <div id="m-music" class="mode-btn active" data-val="MUSIC" onclick="toggleGenre(this)">MUSIC</div>
+                            <div class="mode-btn" data-val="MIX" onclick="toggleGenre(this)">MIX</div>
+                            <div class="mode-btn" data-val="Lo-fi Hip Hop / Chillhop" onclick="toggleGenre(this)">Lo-fi Hip Hop / Chillhop</div>
+                            <div class="mode-btn" data-val="Indie / Bedroom Pop" onclick="toggleGenre(this)">Indie / Bedroom Pop</div>
+                            <div class="mode-btn" data-val="Hip Hop / Rap" onclick="toggleGenre(this)">Hip Hop / Rap</div>
+                            <div class="mode-btn" data-val="Pop / Modern Pop" onclick="toggleGenre(this)">Pop / Modern Pop</div>
+                            <div class="mode-btn" data-val="R&B / Soul" onclick="toggleGenre(this)">R&B / Soul</div>
+                        </div>
+                    </div>
+                    <div class="bottom-row">
+                        <div id="theme-trigger" onclick="togglePlayerTheme()">☀</div>
+                        <div id="key-trigger" onclick="toggleSetup()">🔑</div>
+                        <div class="input-wrapper">
+                            <input type="text" id="search-input" placeholder="" onkeydown="if(event.key==='Enter') doSearch()">
+                            <div id="status"></div>
+                        </div>
+                        <button id="search-btn" onclick="doSearch()">GO</button>
+                    </div>
                 </div>
-                <button id="search-btn" onclick="doSearch()">GO</button>
+
+                <div class="fixed-nav-container" id="fixed-nav" style="display:none;">
+                    <div class="nav-link" onclick="restoreLastSearch()">ALBUM / BACK</div>
+                    <div class="nav-link" onclick="doSearch(true)">↻ REFRESH</div>
+                </div>
+
+                <div id="lst">
+                    <div class="list-inner" id="list-inner"></div>
+                </div>
             </div>
-        </div>
-
-        <div class="fixed-nav-container" id="fixed-nav" style="display:none;">
-            <div class="nav-link" onclick="restoreLastSearch()">ALBUM / BACK</div>
-            <div class="nav-link" onclick="doSearch(true)">↻ REFRESH</div>
-        </div>
-
-        <div id="lst">
-            <div class="list-inner" id="list-inner"></div>
         </div>
     </div>
 
