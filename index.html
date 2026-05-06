@@ -139,13 +139,13 @@
             width: 100%;
             max-width: 100%;
             min-width: 0;
-            height: 34px;
             overflow-x: auto;
             overflow-y: hidden;
             display: flex;
-            scroll-snap-type: x mandatory;
+            scroll-snap-type: none;
             -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
+            padding: 10px 0;
+            scroll-behavior: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
             cursor: grab;
@@ -168,41 +168,33 @@
         .rotary-track {
             display: flex;
             align-items: center;
-            height: 34px;
-            width: max-content;
+            padding: 0 50%;
             min-width: max-content;
-            padding-left: calc(50% - 78px);
-            padding-right: calc(50% - 78px);
         }
         .mode-btn {
-            scroll-snap-align: center;
-            flex: 0 0 156px;
-            width: 156px;
+            scroll-snap-align: none;
+            flex-shrink: 0;
+            width: 180px;
             height: 28px;
+            font-size: 0.6rem;
             padding: 0;
-            margin: 0 7px;
+            margin: 0 10px;
             background: var(--gray);
             border: 1px solid var(--line-strong);
-            border-radius: 999px;
+            border-radius: 20px;
             color: var(--dark-gray);
-            font-size: 0.6rem;
             font-weight: bold;
-            letter-spacing: 0.06em;
+            transition:
+                color 0.3s ease,
+                border-color 0.3s ease,
+                background 0.3s ease;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             cursor: pointer;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             line-height: 1;
-            appearance: none;
-            -webkit-appearance: none;
-            transition:
-                color 0.25s ease,
-                border-color 0.25s ease,
-                background 0.25s ease;
         }
         .mode-btn.active,
         .mode-btn:hover {
@@ -362,17 +354,13 @@
             .right-genre-column { display: grid; grid-template-rows: 70px 92px 84px minmax(0, 1fr); flex: 1 1 auto; min-height: 0; overflow: hidden; }
             .content-type-panel { padding: 6px 14px 9px; }
             .genre-panel { padding: 7px 0 9px; }
-            .rotary-container { height: 34px; }
             .rotary-track {
-                height: 34px;
-                padding-left: calc(50% - 75px);
-                padding-right: calc(50% - 75px);
+                padding: 0 50%;
             }
             .mode-btn {
-                flex-basis: 150px;
-                width: 150px;
+                width: 180px;
                 height: 28px;
-                margin: 0 6px;
+                margin: 0 10px;
                 font-size: 0.6rem;
             }
             .search-panel { padding: 7px 0 9px; }
@@ -410,16 +398,14 @@
             }
 
             .rotary-track {
-                padding-left: calc(50% - 70px);
-                padding-right: calc(50% - 70px);
+                padding: 0 50%;
             }
 
             .mode-btn {
-                flex-basis: 140px;
-                width: 140px;
-                height: 27px;
-                margin: 0 5px;
-                font-size: 0.56rem;
+                width: 180px;
+                height: 28px;
+                margin: 0 10px;
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -620,28 +606,21 @@
             applyPlayerTheme(isLight ? 'dark' : 'light');
         }
 
-        function centerActiveGenre(targetEl = null) {
+        function centerActiveGenre(targetEl = null, behavior = 'smooth') {
             const rotary = document.getElementById('rotary');
             const activeBtn = targetEl || document.querySelector('.mode-btn.active');
 
             if (!rotary || !activeBtn) return;
-            if (rotary.offsetWidth <= 0 || activeBtn.offsetWidth <= 0) return;
 
-            const move = () => {
-                const rotaryRect = rotary.getBoundingClientRect();
-                const activeRect = activeBtn.getBoundingClientRect();
-                const buttonCenter =
-                    activeRect.left -
-                    rotaryRect.left +
-                    rotary.scrollLeft +
-                    activeRect.width / 2;
+            const left =
+                activeBtn.offsetLeft -
+                (rotary.offsetWidth / 2) +
+                (activeBtn.offsetWidth / 2);
 
-                rotary.scrollLeft = buttonCenter - rotary.clientWidth / 2;
-            };
-
-            requestAnimationFrame(move);
-            setTimeout(move, 80);
-            setTimeout(move, 220);
+            rotary.scrollTo({
+                left,
+                behavior
+            });
         }
 
         function renderGenreButtons(type) {
@@ -831,103 +810,111 @@
         }
 
         function initGenreDrag() {
-            const rotary = document.getElementById('rotary');
-            if (!rotary) return;
+            const viewport = document.getElementById('rotary');
+            if (!viewport || viewport.dataset.dragReady === 'true') return;
 
-            const dragSpeed = 1.35;
-            const friction = 0.94;
-            const minVelocity = 0.05;
+            viewport.dataset.dragReady = 'true';
 
-            const stopMomentum = () => {
-                if (genreMomentumFrame) {
-                    cancelAnimationFrame(genreMomentumFrame);
-                    genreMomentumFrame = null;
+            let isDown = false;
+            let startX = 0;
+            let startScrollLeft = 0;
+            let lastX = 0;
+            let lastTime = 0;
+            let velocity = 0;
+            let hasDragged = false;
+            let momentumFrame = null;
+
+            const dragSpeed = 1.9;
+            const friction = 0.92;
+            const minVelocity = 0.08;
+
+            function stopMomentum() {
+                if (!momentumFrame) return;
+                cancelAnimationFrame(momentumFrame);
+                momentumFrame = null;
+            }
+
+            function runMomentum() {
+                viewport.scrollLeft -= velocity;
+                velocity *= friction;
+
+                if (Math.abs(velocity) > minVelocity) {
+                    momentumFrame = requestAnimationFrame(runMomentum);
+                    return;
                 }
-            };
 
-            const startMomentum = () => {
-                const step = () => {
-                    rotary.scrollLeft -= genreVelocity;
-                    genreVelocity *= friction;
+                momentumFrame = null;
 
-                    if (Math.abs(genreVelocity) > minVelocity) {
-                        genreMomentumFrame = requestAnimationFrame(step);
-                        return;
-                    }
+                setTimeout(() => {
+                    centerActiveGenre(null, 'smooth');
+                }, 120);
+            }
 
-                    genreMomentumFrame = null;
-                };
+            viewport.addEventListener('mousedown', (event) => {
+                if (event.button !== 0) return;
 
-                genreMomentumFrame = requestAnimationFrame(step);
-            };
-
-            rotary.addEventListener('pointerdown', (event) => {
-                genrePointerDown = true;
-                isGenreDragging = false;
-                genreDragStartX = event.clientX;
-                genreLastX = event.clientX;
-                genreLastTime = performance.now();
-                genreDragStartScrollLeft = rotary.scrollLeft;
-                genreVelocity = 0;
+                isDown = true;
+                hasDragged = false;
 
                 stopMomentum();
 
-                try {
-                    rotary.setPointerCapture(event.pointerId);
-                } catch (e) {}
+                startX = event.pageX;
+                startScrollLeft = viewport.scrollLeft;
+                lastX = event.pageX;
+                lastTime = performance.now();
+                velocity = 0;
+
+                viewport.classList.add('dragging');
+                event.preventDefault();
             });
 
-            rotary.addEventListener('pointermove', (event) => {
-                if (!genrePointerDown) return;
+            window.addEventListener('mousemove', (event) => {
+                if (!isDown) return;
 
                 const now = performance.now();
-                const dx = event.clientX - genreDragStartX;
-                const frameDx = event.clientX - genreLastX;
-                const dt = Math.max(1, now - genreLastTime);
+                const dx = event.pageX - startX;
+                const frameDx = event.pageX - lastX;
+                const dt = Math.max(1, now - lastTime);
 
                 if (Math.abs(dx) > 4) {
-                    isGenreDragging = true;
-                    rotary.classList.add('dragging');
+                    hasDragged = true;
                 }
 
-                rotary.scrollLeft = genreDragStartScrollLeft - dx * dragSpeed;
-                genreVelocity = (frameDx / dt) * 14 * dragSpeed;
+                viewport.scrollLeft = startScrollLeft - dx * dragSpeed;
+                velocity = (frameDx / dt) * 18 * dragSpeed;
 
-                genreLastX = event.clientX;
-                genreLastTime = now;
+                lastX = event.pageX;
+                lastTime = now;
             });
 
-            rotary.addEventListener('pointerup', (event) => {
-                if (!genrePointerDown) return;
+            window.addEventListener('mouseup', () => {
+                if (!isDown) return;
 
-                genrePointerDown = false;
-                rotary.classList.remove('dragging');
+                isDown = false;
+                viewport.classList.remove('dragging');
 
-                try {
-                    rotary.releasePointerCapture(event.pointerId);
-                } catch (e) {}
-
-                if (Math.abs(genreVelocity) > minVelocity) {
-                    startMomentum();
+                if (Math.abs(velocity) > minVelocity) {
+                    runMomentum();
+                } else {
+                    setTimeout(() => {
+                        centerActiveGenre(null, 'smooth');
+                    }, 120);
                 }
 
                 setTimeout(() => {
-                    isGenreDragging = false;
-                }, 140);
+                    hasDragged = false;
+                }, 120);
             });
 
-            rotary.addEventListener('pointercancel', () => {
-                genrePointerDown = false;
-                isGenreDragging = false;
-                rotary.classList.remove('dragging');
-            });
-
-            rotary.addEventListener('click', (event) => {
-                if (isGenreDragging) {
+            viewport.addEventListener(
+                'click',
+                (event) => {
+                    if (!hasDragged) return;
                     event.preventDefault();
                     event.stopPropagation();
-                }
-            }, true);
+                },
+                true
+            );
         }
 
         async function doSearch(isNext = false) {
