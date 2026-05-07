@@ -335,10 +335,151 @@
         }
 
         /* 共通パーツ */
-        #setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .z-panel { width: 85%; max-width: 360px; padding: 40px 20px; border: 1px solid var(--accent); background: var(--bg); text-align: center; }
-        .z-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 15px; width: 100%; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-bottom: 20px; }
-        .setup-input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line-strong); color: var(--accent); font-family: monospace; text-align: center; outline: none; box-sizing: border-box; }
+        #setup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .z-panel {
+            width: 90%;
+            max-width: 440px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 34px 28px 28px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--text);
+            text-align: center;
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .z-panel::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+
+        .api-settings-title {
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
+            font-size: 0.82rem;
+            color: var(--accent);
+            letter-spacing: 0.18em;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .api-settings-desc {
+            font-size: 0.72rem;
+            line-height: 1.7;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            margin: 0 0 22px;
+            text-align: left;
+        }
+
+        .api-settings-note {
+            font-size: 0.62rem;
+            line-height: 1.6;
+            color: var(--muted);
+            opacity: 0.82;
+            letter-spacing: 0.03em;
+            margin: 14px 0 18px;
+            text-align: left;
+        }
+
+        .z-btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 999px;
+            padding: 12px 16px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .z-btn:hover {
+            background: var(--control-bg);
+        }
+
+        .z-btn.secondary {
+            color: var(--muted);
+            border-color: var(--line-strong);
+        }
+
+        .z-btn.secondary:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .setup-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--control-bg);
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            color: var(--text);
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
+            font-size: 0.78rem;
+            text-align: center;
+            outline: none;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        .setup-input:focus {
+            border-color: var(--accent);
+        }
+
+        .api-action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .api-action-grid .z-btn {
+            margin-bottom: 0;
+        }
+
+        .api-status {
+            min-height: 18px;
+            margin-top: 14px;
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+
+        .api-status.valid {
+            color: var(--accent);
+        }
+
+        .api-close {
+            margin-top: 24px;
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.14em;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .api-close:hover {
+            color: var(--accent);
+        }
 
         .section-label { font-size: 0.65rem; color: var(--accent); font-weight: bold; margin: 15px 0 10px; border-left: 2px solid var(--accent); padding-left: 8px; letter-spacing: 2px; }
         .row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
@@ -609,9 +750,39 @@
 
     <div id="setup-overlay">
         <div class="z-panel">
-            <button class="z-btn" onclick="openGoogle()">OPEN TERMINAL</button>
-            <input type="text" id="api-key-input" class="setup-input" placeholder="PASTE CORE KEY" oninput="checkKey()">
-            <div onclick="toggleSetup()" style="margin-top:30px; font-size:0.6rem; color:#444; cursor:pointer;">[ CLOSE ]</div>
+            <div class="api-settings-title">YOUTUBE API KEY</div>
+
+            <p class="api-settings-desc">
+                Enter your YouTube Data API key to enable search.
+                You can create or manage your key from Google Cloud Console.
+            </p>
+
+            <button class="z-btn" onclick="openGoogle()">OPEN GOOGLE CLOUD CONSOLE</button>
+
+            <input
+                type="text"
+                id="api-key-input"
+                class="setup-input"
+                placeholder="PASTE YOUTUBE API KEY"
+                autocomplete="off"
+                spellcheck="false"
+            >
+
+            <p class="api-settings-note">
+                If you choose SAVE KEY, the API key is stored only in this browser.
+                If you choose USE THIS TIME ONLY, it will not be saved.
+            </p>
+
+            <div class="api-action-grid">
+                <button class="z-btn secondary" onclick="checkKeyOnly()">CHECK KEY</button>
+                <button class="z-btn" onclick="saveApiKey()">SAVE KEY</button>
+                <button class="z-btn secondary" onclick="useApiKeyOnce()">USE THIS TIME ONLY</button>
+                <button class="z-btn secondary" onclick="clearSavedApiKey()">CLEAR SAVED KEY</button>
+            </div>
+
+            <div id="api-key-status" class="api-status">API KEY NOT CHECKED</div>
+
+            <div class="api-close" onclick="toggleSetup()">CLOSE</div>
         </div>
     </div>
 
@@ -829,27 +1000,119 @@
             else trigger.classList.remove('active');
         }
 
+        function setApiKeyStatus(text, isValid = false) {
+            const status = document.getElementById('api-key-status');
+            if (!status) return;
+
+            status.textContent = text;
+            status.classList.toggle('valid', isValid);
+        }
+
         function toggleSetup() {
             const el = document.getElementById('setup-overlay');
-            el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+            if (!el) return;
+
+            const willOpen = el.style.display !== 'flex';
+            el.style.display = willOpen ? 'flex' : 'none';
+
+            if (willOpen) {
+                const input = document.getElementById('api-key-input');
+
+                if (input) {
+                    input.value = API_KEY || localStorage.getItem('ZEFRAM_API_KEY') || "";
+                }
+
+                if (API_KEY) {
+                    setApiKeyStatus("API KEY LOADED", true);
+                } else {
+                    setApiKeyStatus("API KEY NOT SET", false);
+                }
+            }
         }
 
         function openGoogle() {
-            window.open('https://console.cloud.google.com/apis/credentials', 'z_terminal', 'width=700,height=800');
+            if (window.electronAPI?.openGoogleConsoleWindow) {
+                window.electronAPI.openGoogleConsoleWindow();
+                return;
+            }
+
+            window.open(
+                'https://console.cloud.google.com/apis/credentials',
+                'zbuddy_api_setup',
+                'width=900,height=760'
+            );
         }
 
-        async function checkKey() {
-            const val = document.getElementById('api-key-input').value.trim();
-            if (val.length < 30) return;
+        async function validateApiKeyValue(value) {
+            const key = String(value || "").trim();
+
+            if (key.length < 30) {
+                setApiKeyStatus("API KEY IS TOO SHORT", false);
+                return false;
+            }
+
+            setApiKeyStatus("CHECKING API KEY...", false);
+
             try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=JP&key=${val}`);
-                if (res.ok) {
-                    localStorage.setItem('ZEFRAM_API_KEY', val);
-                    API_KEY = val;
-                    updateKeyStatus();
-                    toggleSetup();
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=JP&key=${encodeURIComponent(key)}`);
+
+                if (!res.ok) {
+                    setApiKeyStatus("API KEY CHECK FAILED", false);
+                    return false;
                 }
-            } catch (e) { console.error("Key verification failed"); }
+
+                setApiKeyStatus("API KEY VALID", true);
+                return true;
+            } catch (e) {
+                console.error("Key verification failed", e);
+                setApiKeyStatus("API KEY CHECK ERROR", false);
+                return false;
+            }
+        }
+
+        async function checkKeyOnly() {
+            const input = document.getElementById('api-key-input');
+            const value = input ? input.value : "";
+
+            await validateApiKeyValue(value);
+        }
+
+        async function saveApiKey() {
+            const input = document.getElementById('api-key-input');
+            const value = input ? input.value.trim() : "";
+
+            const ok = await validateApiKeyValue(value);
+            if (!ok) return;
+
+            localStorage.setItem('ZEFRAM_API_KEY', value);
+            API_KEY = value;
+
+            updateKeyStatus();
+            setApiKeyStatus("API KEY SAVED", true);
+        }
+
+        async function useApiKeyOnce() {
+            const input = document.getElementById('api-key-input');
+            const value = input ? input.value.trim() : "";
+
+            const ok = await validateApiKeyValue(value);
+            if (!ok) return;
+
+            API_KEY = value;
+
+            updateKeyStatus();
+            setApiKeyStatus("API KEY ACTIVE FOR THIS SESSION", true);
+        }
+
+        function clearSavedApiKey() {
+            localStorage.removeItem('ZEFRAM_API_KEY');
+            API_KEY = null;
+
+            const input = document.getElementById('api-key-input');
+            if (input) input.value = "";
+
+            updateKeyStatus();
+            setApiKeyStatus("SAVED API KEY CLEARED", false);
         }
 
         function setMediaType(el) {
