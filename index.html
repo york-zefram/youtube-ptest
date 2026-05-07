@@ -801,6 +801,24 @@
         let currentBottomMode = "";
         let lastVideoId = "";
         let genreDragClickBlock = false;
+        let mediaMemory = {
+            music: {
+                selectedGenres: [],
+                searchInput: "",
+                currentQuery: "",
+                lastResultsHTML: "",
+                nextPageToken: "",
+                navVisible: false
+            },
+            video: {
+                selectedGenres: [],
+                searchInput: "",
+                currentQuery: "",
+                lastResultsHTML: "",
+                nextPageToken: "",
+                navVisible: false
+            }
+        };
 
         const YOUTUBE_MUSIC_GENRES = [
             { label: "Latin / Reggaeton", query: "Latin / Reggaeton" },
@@ -1117,30 +1135,51 @@
         }
 
         function setMediaType(el) {
+            const nextType = el.getAttribute('data-type') || "music";
+
+            if (nextType === currentMediaType) return;
+
+            saveCurrentMediaMemory();
+
             document.querySelectorAll('.media-type-icon').forEach(icon => {
                 icon.classList.remove('active');
             });
 
             el.classList.add('active');
-            currentMediaType = el.getAttribute('data-type') || "music";
-
-            const primary = getPrimaryGenre();
-            selectedGenres = [primary.query];
-
-            const input = document.getElementById('search-input');
-            if (input) input.value = primary.query;
-
-            nextPageToken = "";
-            currentQuery = primary.query;
-            lastResultsHTML = "";
-
-            const listInner = document.getElementById('list-inner');
-            if (listInner) listInner.innerHTML = "";
-
-            const nav = document.getElementById('fixed-nav');
-            if (nav) nav.style.display = "none";
+            currentMediaType = nextType;
 
             renderGenreButtons();
+
+            const restored = restoreMediaMemory(currentMediaType);
+
+            if (!restored) {
+                const primary = getPrimaryGenre();
+
+                selectedGenres = [primary.query];
+
+                const input = document.getElementById('search-input');
+                if (input) input.value = primary.query;
+
+                nextPageToken = "";
+                currentQuery = primary.query;
+                lastResultsHTML = "";
+
+                const listInner = document.getElementById('list-inner');
+                if (listInner) listInner.innerHTML = "";
+
+                const nav = document.getElementById('fixed-nav');
+                if (nav) nav.style.display = "none";
+
+                renderGenreButtons();
+            } else {
+                renderGenreButtons();
+
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    const query = btn.getAttribute('data-query');
+                    btn.classList.toggle('active', selectedGenres.includes(query));
+                });
+            }
+
             saveSession();
         }
 
@@ -1158,7 +1197,66 @@
             saveSession();
         }
 
+        function saveCurrentMediaMemory() {
+            const input = document.getElementById('search-input');
+            const listInner = document.getElementById('list-inner');
+            const nav = document.getElementById('fixed-nav');
+
+            if (!mediaMemory[currentMediaType]) {
+                mediaMemory[currentMediaType] = {
+                    selectedGenres: [],
+                    searchInput: "",
+                    currentQuery: "",
+                    lastResultsHTML: "",
+                    nextPageToken: "",
+                    navVisible: false
+                };
+            }
+
+            mediaMemory[currentMediaType] = {
+                selectedGenres: Array.isArray(selectedGenres) ? [...selectedGenres] : [],
+                searchInput: input ? input.value : "",
+                currentQuery,
+                lastResultsHTML: listInner ? listInner.innerHTML : lastResultsHTML,
+                nextPageToken,
+                navVisible: nav ? nav.style.display === "flex" : false
+            };
+        }
+
+        function restoreMediaMemory(type) {
+            const memory = mediaMemory[type];
+            const input = document.getElementById('search-input');
+            const listInner = document.getElementById('list-inner');
+            const nav = document.getElementById('fixed-nav');
+
+            if (!memory) return false;
+
+            selectedGenres = Array.isArray(memory.selectedGenres) && memory.selectedGenres.length > 0
+                ? [...memory.selectedGenres]
+                : [getPrimaryGenre().query];
+
+            currentQuery = memory.currentQuery || "";
+            nextPageToken = memory.nextPageToken || "";
+            lastResultsHTML = memory.lastResultsHTML || "";
+
+            if (input) {
+                input.value = memory.searchInput || selectedGenres.join(' ');
+            }
+
+            if (listInner) {
+                listInner.innerHTML = lastResultsHTML;
+            }
+
+            if (nav) {
+                nav.style.display = memory.navVisible && lastResultsHTML ? "flex" : "none";
+            }
+
+            return !!lastResultsHTML;
+        }
+
         function saveSession() {
+            saveCurrentMediaMemory();
+
             const input = document.getElementById('search-input');
 
             const session = {
@@ -1168,7 +1266,8 @@
                 searchInput: input ? input.value : "",
                 currentQuery,
                 lastResultsHTML,
-                lastVideoId
+                lastVideoId,
+                mediaMemory
             };
 
             localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -1187,6 +1286,31 @@
                 currentQuery = session.currentQuery || "";
                 lastResultsHTML = session.lastResultsHTML || "";
                 lastVideoId = session.lastVideoId || "";
+
+                if (session.mediaMemory && typeof session.mediaMemory === "object") {
+                    mediaMemory = {
+                        music: {
+                            selectedGenres: [],
+                            searchInput: "",
+                            currentQuery: "",
+                            lastResultsHTML: "",
+                            nextPageToken: "",
+                            navVisible: false,
+                            ...(session.mediaMemory.music || {})
+                        },
+                        video: {
+                            selectedGenres: [],
+                            searchInput: "",
+                            currentQuery: "",
+                            lastResultsHTML: "",
+                            nextPageToken: "",
+                            navVisible: false,
+                            ...(session.mediaMemory.video || {})
+                        }
+                    };
+                }
+
+                restoreMediaMemory(currentMediaType);
 
                 if (selectedGenres.length === 0) {
                     const primary = getPrimaryGenre();
@@ -1222,10 +1346,7 @@
                     }
                 });
 
-                if (lastResultsHTML) {
-                    document.getElementById('list-inner').innerHTML = lastResultsHTML;
-                    document.getElementById('fixed-nav').style.display = 'flex';
-                }
+                restoreMediaMemory(currentMediaType);
 
             } catch (e) {
                 console.error("Session restore failed");
@@ -1437,6 +1558,8 @@
             inner.innerHTML = html;
             lastResultsHTML = html;
             document.getElementById('lst').scrollTop = 0;
+
+            saveCurrentMediaMemory();
             saveSession();
         }
 
@@ -1479,6 +1602,8 @@
             document.getElementById('status').innerText = "";
             document.getElementById('lst').scrollTop = 0;
             lastResultsHTML = html;
+
+            saveCurrentMediaMemory();
             saveSession();
         }
 
