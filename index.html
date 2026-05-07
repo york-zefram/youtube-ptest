@@ -239,7 +239,7 @@
         .bottom-row {
             width: 100%;
             display: grid;
-            grid-template-columns: 24px minmax(0, 1fr) 40px;
+            grid-template-columns: 24px minmax(0, 1fr) 30px;
             gap: 10px;
             align-items: center;
             margin-top: 10px;
@@ -270,13 +270,13 @@
             fill: var(--accent);
         }
 
-        .input-wrapper { flex-grow: 1; position: relative; min-width: 0; }
-        #search-input { background: var(--control-bg); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 1rem; color: var(--text); width: 100%; min-width: 0; padding: 10px 14px; outline: none; box-sizing: border-box; }
-        #search-btn { width: 40px; height: 40px; min-width: 40px; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--control-bg); color: var(--muted); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .input-wrapper { flex-grow: 1; position: relative; min-width: 0; height: 30px; }
+        #search-input { background: var(--control-bg); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 0.85rem; color: var(--text); width: 100%; min-width: 0; height: 30px; min-height: 30px; line-height: 30px; padding: 0 14px; outline: none; box-sizing: border-box; display: block; appearance: none; -webkit-appearance: none; }
+        #search-btn { width: 30px; height: 30px; min-width: 30px; min-height: 30px; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--control-bg); color: var(--muted); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
         #search-btn:hover,
         #search-btn.active { color: var(--accent); border-color: var(--accent); }
-        #search-btn svg { width: 21px; height: 21px; display: block; fill: currentColor; }
-        #status { position: absolute; left: 0; top: 100%; font-size: 0.55rem; color: var(--muted); margin-top: 4px; letter-spacing: 1px; }
+        #search-btn svg { width: 16px; height: 16px; display: block; fill: currentColor; }
+        #status { display: none; }
 
         /* 6. ナビゲーション固定エリア（揺れ防止のため独立） */
         .fixed-nav-container { 
@@ -607,7 +607,7 @@
 
             .bottom-row {
                 width: 100%;
-                grid-template-columns: 24px minmax(0, 1fr) 40px;
+                grid-template-columns: 24px minmax(0, 1fr) 30px;
                 padding: 0 14px;
                 box-sizing: border-box;
             }
@@ -1470,27 +1470,51 @@
 
         async function doSearch(isNext = false) {
             if (!API_KEY) return toggleSetup();
+
             const q = document.getElementById('search-input').value;
             if (!q && selectedGenres.length === 0) return;
-            if (!isNext) { nextPageToken = ""; currentQuery = q; }
+
+            if (!isNext) {
+                nextPageToken = "";
+                currentQuery = q;
+            }
+
             saveSession();
-            document.getElementById('status').innerText = isNext ? "LOADING NEXT..." : "SEARCHING...";
+
+            const status = document.getElementById('status');
+            if (status) status.innerText = "";
+
             try {
                 let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(currentQuery + " - Topic")}&maxResults=50&key=${API_KEY}`;
                 if (isNext && nextPageToken) url += `&pageToken=${nextPageToken}`;
+
                 const res = await fetch(url);
                 const data = await res.json();
+
                 nextPageToken = data.nextPageToken || "";
-                const videoIds = data.items.filter(i => i.id.kind === 'youtube#video').map(i => i.id.videoId).join(',');
+
+                const videoIds = data.items
+                    .filter(i => i.id.kind === 'youtube#video')
+                    .map(i => i.id.videoId)
+                    .join(',');
+
                 let durationMap = {};
+
                 if (videoIds) {
                     const dRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${API_KEY}`);
                     const dData = await dRes.json();
-                    dData.items.forEach(i => { durationMap[i.id] = parseDuration(i.contentDetails.duration); });
+
+                    dData.items.forEach(i => {
+                        durationMap[i.id] = parseDuration(i.contentDetails.duration);
+                    });
                 }
+
                 renderList(data.items, durationMap);
-                document.getElementById('status').innerText = "";
-            } catch (e) { document.getElementById('status').innerText = "ERROR"; }
+
+                if (status) status.innerText = "";
+            } catch (e) {
+                console.error("Search failed", e);
+            }
         }
 
         function renderList(items, durationMap) {
@@ -1564,7 +1588,8 @@
         }
 
         async function loadAlbum(playlistId, title) {
-            document.getElementById('status').innerText = "LOADING...";
+            const status = document.getElementById('status');
+            if (status) status.innerText = "";
             const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}`;
             const res = await fetch(url);
             const data = await res.json();
@@ -1599,7 +1624,9 @@
                 </div>
             `).join('');
             document.getElementById('list-inner').innerHTML = html;
-            document.getElementById('status').innerText = "";
+
+            if (status) status.innerText = "";
+
             document.getElementById('lst').scrollTop = 0;
             lastResultsHTML = html;
 
