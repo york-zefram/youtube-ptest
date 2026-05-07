@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en-US">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZEFRAM LST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #000000;
@@ -35,9 +36,14 @@
             padding: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: sans-serif;
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
             overflow: hidden;
             overscroll-behavior: none;
+        }
+
+        button,
+        input {
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
         }
         
         /* 全体レイアウト：Flexで各エリアを完全に分離 */
@@ -83,6 +89,44 @@
         /* 1. ビデオエリア */
         #video-container { width: 100%; aspect-ratio: 16 / 9; background: #000000; flex-shrink: 0; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
         #player { width: 100%; height: 100%; transform: scale(1.01); }
+
+        #player-initial-state {
+            position: absolute;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            color: var(--text);
+            text-align: center;
+            pointer-events: none;
+            user-select: none;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        #player-initial-state.hidden {
+            display: none;
+        }
+
+        .player-initial-title {
+            color: var(--accent);
+            font-family: "Michroma", sans-serif;
+            font-size: clamp(16px, 2.2vh, 24px);
+            letter-spacing: 0.22em;
+            margin-bottom: 18px;
+        }
+
+        .player-initial-text {
+            max-width: 620px;
+            color: var(--muted);
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
+            font-size: 12px;
+            line-height: 1.8;
+            letter-spacing: 0.08em;
+        }
 
         /* 2. 再生コントロール */
         .player-controls { display: flex; align-items: center; height: var(--bar-h); min-height: var(--bar-h); padding: 0 18px; background: var(--bg); gap: 18px; flex-shrink: 0; position: relative; z-index: 10; margin-top: auto; }
@@ -245,7 +289,9 @@
         .nav-link:active { opacity: 0.5; }
 
         /* 6. スクロールリストエリア */
-        #lst { flex: 1 1 0; min-height: 0; max-height: calc(100% - 70px); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--bg); }
+        #lst { flex: 1 1 0; min-height: 0; max-height: calc(100% - 70px); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; position: relative; z-index: 5; background: var(--bg); scrollbar-width: none; -ms-overflow-style: none; }
+        #lst::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+        #lst::-webkit-scrollbar-thumb { background: transparent; }
         .list-inner { padding: 0 15px 50px 15px; background: var(--bg); }
 
         /* 7. プレイリスト・ローカルファイル・設定エリア */
@@ -408,6 +454,8 @@
                 overflow-x: hidden;
                 -webkit-overflow-scrolling: touch;
                 background: var(--bg);
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
 
             .list-inner {
@@ -430,7 +478,16 @@
     <div class="main-container">
         <div class="player-column">
         <!-- 1段目：YouTube iframe 表示エリア -->
-        <div id="video-container"><div id="player"></div></div>
+        <div id="video-container">
+            <div id="player"></div>
+            <div id="player-initial-state">
+                <div class="player-initial-title">YOUTUBE PLAYER</div>
+                <div class="player-initial-text">
+                    Select MUSIC or VIDEO.<br>
+                    Search from the right panel, and play from the result list.
+                </div>
+            </div>
+        </div>
 
         <!-- 2段目：再生バーなどの操作系エリア -->
         <div class="player-controls">
@@ -1207,8 +1264,14 @@
             console.log("FAVORITE_ITEM_PENDING", favoriteItem);
         }
 
+        function hidePlayerInitialState() {
+            const initialState = document.getElementById('player-initial-state');
+            if (initialState) initialState.classList.add('hidden');
+        }
+
         function playVideo(id) {
             if (player && player.loadVideoById) {
+                hidePlayerInitialState();
                 lastVideoId = id;
                 player.loadVideoById({ videoId: id });
                 document.getElementById('search-input').blur();
