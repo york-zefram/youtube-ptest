@@ -436,7 +436,7 @@
             height: 58px;
             min-height: 58px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(180px, 280px);
+            grid-template-columns: minmax(0, 1fr) minmax(210px, 320px);
             gap: 14px;
             align-items: center;
             padding: 0 18px;
@@ -575,6 +575,204 @@
             letter-spacing: 0.06em;
         }
 
+
+        .playlist-search-row {
+            width: 100%;
+            min-width: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 30px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .playlist-trash-btn {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            min-height: 30px;
+            padding: 0;
+            border: 1px solid var(--line-strong);
+            border-radius: 50%;
+            background: var(--control-bg);
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .playlist-trash-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .playlist-trash-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            pointer-events: none;
+        }
+
+        .playlist-trash-count {
+            position: absolute;
+            right: -6px;
+            top: -6px;
+            min-width: 15px;
+            height: 15px;
+            padding: 0 4px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #000000;
+            font-size: 0.55rem;
+            font-weight: bold;
+            line-height: 15px;
+            display: none;
+            box-sizing: border-box;
+        }
+
+        .playlist-trash-btn.active .playlist-trash-count {
+            display: block;
+        }
+
+        .playlist-row {
+            width: 100%;
+            min-height: 62px;
+            max-height: 72px;
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--text);
+            box-sizing: border-box;
+            overflow: hidden;
+            cursor: default;
+            transition:
+                opacity 0.32s ease,
+                transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+                max-height 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                min-height 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                padding 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                border-width 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .playlist-row.removing {
+            opacity: 0;
+            transform: translateY(-6px);
+            max-height: 0;
+            min-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-bottom-width: 0;
+            pointer-events: none;
+        }
+
+        .playlist-delete-select {
+            width: 26px;
+            height: 26px;
+            margin-left: 10px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .playlist-delete-select.active {
+            color: var(--accent);
+        }
+
+        .playlist-delete-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.72);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition:
+                opacity 0.32s ease,
+                visibility 0s linear 0.32s;
+        }
+
+        .playlist-delete-modal.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition:
+                opacity 0.32s ease,
+                visibility 0s linear 0s;
+        }
+
+        .playlist-delete-panel {
+            width: min(360px, 86vw);
+            padding: 30px 24px 24px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .playlist-delete-title {
+            font-family: "Michroma", sans-serif;
+            font-size: 0.78rem;
+            color: var(--accent);
+            letter-spacing: 0.18em;
+            margin-bottom: 18px;
+        }
+
+        .playlist-delete-message {
+            color: var(--muted);
+            font-size: 0.72rem;
+            line-height: 1.7;
+            letter-spacing: 0.04em;
+            margin-bottom: 22px;
+        }
+
+        .playlist-delete-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .playlist-delete-cancel,
+        .playlist-delete-confirm {
+            height: 32px;
+            border-radius: 999px;
+            border: 1px solid var(--line-strong);
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.65rem;
+            font-weight: bold;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+        }
+
+        .playlist-delete-confirm {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .playlist-delete-cancel:hover,
+        .playlist-delete-confirm:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
         @media (max-width: 980px) {
             .playlist-toolbar {
                 height: 96px;
@@ -594,6 +792,10 @@
             }
 
             .playlist-search-wrap {
+                width: 100%;
+            }
+
+            .playlist-search-row {
                 width: 100%;
             }
         }
@@ -1038,15 +1240,34 @@
                 <button class="playlist-tab" type="button" data-playlist-tab="videos" onclick="setPlaylistTab('videos')">VIDEOS</button>
             </div>
 
-            <div class="playlist-search-wrap">
-                <input
-                    id="playlist-search-input"
-                    class="playlist-search-input"
-                    type="text"
-                    placeholder="Search"
-                    autocomplete="off"
-                    spellcheck="false"
+            <div class="playlist-search-row">
+                <div class="playlist-search-wrap">
+                    <input
+                        id="playlist-search-input"
+                        class="playlist-search-input"
+                        type="text"
+                        placeholder="Search"
+                        autocomplete="off"
+                        spellcheck="false"
+                        oninput="renderPlaylistItems()"
+                    >
+                </div>
+
+                <button
+                    id="playlist-trash-btn"
+                    class="playlist-trash-btn"
+                    type="button"
+                    onclick="openPlaylistDeleteConfirm()"
+                    aria-label="Delete selected playlist items"
+                    title="Delete selected"
                 >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 7h10l-.7 13H7.7L7 7Z"></path>
+                        <path d="M9 7V4.8h6V7"></path>
+                        <path d="M5.5 7h13"></path>
+                    </svg>
+                    <span id="playlist-trash-count" class="playlist-trash-count">0</span>
+                </button>
             </div>
         </div>
 
@@ -1056,6 +1277,28 @@
                     <div class="playlist-empty-title">NO ITEMS</div>
                     <div class="playlist-empty-text">Use the star icon to add items.</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="playlist-delete-modal" class="playlist-delete-modal">
+        <div class="playlist-delete-panel">
+            <div class="playlist-delete-title">DELETE ITEMS</div>
+
+            <div id="playlist-delete-message" class="playlist-delete-message">
+                Delete selected items?
+            </div>
+
+            <div class="playlist-delete-actions">
+                <button class="playlist-delete-cancel" type="button" onclick="closePlaylistDeleteConfirm()">
+                    CANCEL
+                </button>
+
+                <button class="playlist-delete-confirm" type="button" onclick="deleteSelectedPlaylistItems()">
+                    DELETE
+                </button>
             </div>
         </div>
     </div>
@@ -1495,21 +1738,266 @@
         }
 
 
+        const PLAYLIST_STORAGE_KEY = "ZEFRAM_PLAYLIST_ITEMS";
+
         let currentPlaylistTab = "album";
+        let selectedPlaylistDeleteIds = [];
+
+        function escapeHtml(value) {
+            return String(value || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeJsString(value) {
+            return String(value || "")
+                .replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'")
+                .replace(/\n/g, "\\n")
+                .replace(/\r/g, "");
+        }
+
+        function getPlaylistItems() {
+            try {
+                const raw = localStorage.getItem(PLAYLIST_STORAGE_KEY);
+                const items = raw ? JSON.parse(raw) : [];
+                return Array.isArray(items) ? items : [];
+            } catch (e) {
+                console.error("Failed to read playlist items", e);
+                return [];
+            }
+        }
+
+        function savePlaylistItems(items) {
+            localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(items || []));
+        }
+
+        function createPlaylistItemId(data) {
+            if (data.playlistId) {
+                return `playlist:${data.playlistId}`;
+            }
+
+            if (data.videoId) {
+                return `video:${data.videoId}`;
+            }
+
+            return `item:${Date.now()}`;
+        }
+
+        function isPlaylistItemSaved(id) {
+            return getPlaylistItems().some(item => item.id === id);
+        }
+
+        function addPlaylistItem(data) {
+            const items = getPlaylistItems();
+            const id = createPlaylistItemId(data);
+
+            if (items.some(item => item.id === id)) {
+                return false;
+            }
+
+            const nextItem = {
+                id,
+                itemType: data.itemType || "",
+                youtubeKind: data.youtubeKind || "",
+                videoId: data.videoId || "",
+                playlistId: data.playlistId || "",
+                title: data.title || "",
+                thumbUrl: data.thumbUrl || "",
+                duration: data.duration || "",
+                savedAt: Date.now()
+            };
+
+            items.push(nextItem);
+            savePlaylistItems(items);
+
+            return true;
+        }
+
+        function normalizePlaylistTab(tab) {
+            if (tab === "album") return "ALBUM";
+            if (tab === "song") return "SONG";
+            if (tab === "lists") return "LIST";
+            if (tab === "videos") return "VIDEO";
+            return "ALBUM";
+        }
+
+        function renderPlaylistItems() {
+            const inner = document.getElementById('playlist-list-inner');
+            if (!inner) return;
+
+            const items = getPlaylistItems();
+            const activeType = normalizePlaylistTab(currentPlaylistTab);
+            const searchInput = document.getElementById('playlist-search-input');
+            const keyword = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+            const filtered = items.filter(item => {
+                const matchType = item.itemType === activeType;
+                const matchKeyword = !keyword || String(item.title || "").toLowerCase().includes(keyword);
+                return matchType && matchKeyword;
+            });
+
+            if (filtered.length === 0) {
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">NO ITEMS</div>
+                        <div class="playlist-empty-text">Use the star icon to add items.</div>
+                    </div>
+                `;
+                updatePlaylistTrashState();
+                return;
+            }
+
+            inner.innerHTML = filtered.map(item => {
+                const selectedClass = selectedPlaylistDeleteIds.includes(item.id) ? " active" : "";
+                const safeTitle = escapeHtml(item.title || "");
+                const safeThumb = escapeHtml(item.thumbUrl || "");
+                const safeDuration = escapeHtml(item.duration || "");
+                const safeType = escapeHtml(item.itemType || "");
+                const safeId = escapeJsString(item.id);
+
+                return `
+                    <div class="playlist-row" data-playlist-id="${escapeHtml(item.id)}">
+                        <span class="type-tag">${safeType}</span>
+
+                        <div class="thumb-box">
+                            ${safeThumb ? `<img src="${safeThumb}" alt="">` : ""}
+                        </div>
+
+                        <div class="title" title="${safeTitle}">${safeTitle}</div>
+
+                        <div class="duration">${safeDuration || "--:--"}</div>
+
+                        <button
+                            class="playlist-delete-select${selectedClass}"
+                            type="button"
+                            onclick="togglePlaylistDeleteSelect(event, '${safeId}', this)"
+                            aria-label="Select for delete"
+                            title="Select for delete"
+                        >
+                            ×
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            updatePlaylistTrashState();
+        }
+
+        function togglePlaylistDeleteSelect(event, id, el) {
+            event.stopPropagation();
+
+            const index = selectedPlaylistDeleteIds.indexOf(id);
+
+            if (index >= 0) {
+                selectedPlaylistDeleteIds.splice(index, 1);
+                el.classList.remove('active');
+            } else {
+                selectedPlaylistDeleteIds.push(id);
+                el.classList.add('active');
+            }
+
+            updatePlaylistTrashState();
+        }
+
+        function updatePlaylistTrashState() {
+            const btn = document.getElementById('playlist-trash-btn');
+            const count = document.getElementById('playlist-trash-count');
+            const total = selectedPlaylistDeleteIds.length;
+
+            if (btn) {
+                btn.classList.toggle('active', total > 0);
+            }
+
+            if (count) {
+                count.textContent = String(total);
+            }
+        }
+
+        function openPlaylistDeleteConfirm() {
+            if (selectedPlaylistDeleteIds.length === 0) return;
+
+            const modal = document.getElementById('playlist-delete-modal');
+            const message = document.getElementById('playlist-delete-message');
+
+            if (message) {
+                message.textContent = `Delete ${selectedPlaylistDeleteIds.length} selected item(s)?`;
+            }
+
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closePlaylistDeleteConfirm() {
+            const modal = document.getElementById('playlist-delete-modal');
+
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function deleteSelectedPlaylistItems() {
+            const idsToDelete = [...selectedPlaylistDeleteIds];
+
+            if (idsToDelete.length === 0) return;
+
+            closePlaylistDeleteConfirm();
+
+            idsToDelete.forEach(id => {
+                const row = document.querySelector(`.playlist-row[data-playlist-id="${CSS.escape(id)}"]`);
+                if (row) {
+                    row.classList.add('removing');
+                }
+            });
+
+            window.setTimeout(() => {
+                const items = getPlaylistItems();
+                const nextItems = items.filter(item => !idsToDelete.includes(item.id));
+
+                savePlaylistItems(nextItems);
+                selectedPlaylistDeleteIds = [];
+
+                renderPlaylistItems();
+                refreshFavoriteButtonStates();
+                updatePlaylistTrashState();
+            }, 460);
+        }
+
+        function refreshFavoriteButtonStates() {
+            document.querySelectorAll('.row').forEach(row => {
+                const button = row.querySelector('.favorite-btn');
+                if (!button) return;
+
+                const playlistId = row.getAttribute('data-playlist-id') || "";
+                const videoId = row.getAttribute('data-video-id') || "";
+                const id = createPlaylistItemId({ playlistId, videoId });
+
+                button.classList.toggle('active', isPlaylistItemSaved(id));
+            });
+        }
 
         function setPlaylistTab(tab) {
             currentPlaylistTab = tab;
+            selectedPlaylistDeleteIds = [];
 
             document.querySelectorAll('.playlist-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-playlist-tab') === tab);
             });
+
+            renderPlaylistItems();
         }
 
         function openPlaylistLayer() {
             const layer = document.getElementById('playlist-layer');
             if (!layer) return;
 
+            selectedPlaylistDeleteIds = [];
             layer.classList.add('active');
+            renderPlaylistItems();
         }
 
         function closePlaylistLayer() {
@@ -1695,6 +2183,7 @@
                 });
 
                 restoreMediaMemory(currentMediaType);
+                refreshFavoriteButtonStates();
 
             } catch (e) {
                 console.error("Session restore failed");
@@ -1878,53 +2367,72 @@
             const playlists = items.filter(i => i.id.kind === 'youtube#playlist');
             if (playlists.length > 0) {
                 html += `<div class="section-label">${playlistFlag}S</div>`;
-                html += playlists.map(i => `
-                    <div
-                        class="row"
-                        data-item-type="${playlistFlag}"
-                        data-youtube-kind="youtube#playlist"
-                        data-playlist-id="${i.id.playlistId}"
-                        onclick="loadAlbum('${i.id.playlistId}', '${i.snippet.title.replace(/'/g, "\\'")}')"
-                    >
-                        <span class="type-tag">${playlistFlag}</span>
-                        <div class="thumb-box">
-                            <img src="${i.snippet.thumbnails.default.url}">
+                html += playlists.map(i => {
+                    const playlistId = i.id.playlistId;
+                    const rawTitle = i.snippet.title || "";
+                    const displayTitle = rawTitle.replace(/ - Topic$/, "");
+                    const thumbUrl = i.snippet.thumbnails?.default?.url || "";
+                    const saveId = createPlaylistItemId({ playlistId });
+                    const savedClass = isPlaylistItemSaved(saveId) ? " active" : "";
+
+                    return `
+                        <div
+                            class="row"
+                            data-item-type="${playlistFlag}"
+                            data-youtube-kind="youtube#playlist"
+                            data-playlist-id="${escapeHtml(playlistId)}"
+                            onclick="loadAlbum('${escapeJsString(playlistId)}', '${escapeJsString(rawTitle)}')"
+                        >
+                            <span class="type-tag">${playlistFlag}</span>
+                            <div class="thumb-box">
+                                <img src="${escapeHtml(thumbUrl)}">
+                            </div>
+                            <div class="title">${escapeHtml(displayTitle)}</div>
+                            <div class="duration">--:--</div>
+                            <button class="favorite-btn${savedClass}" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
+                                <svg viewBox="0 0 512 512" aria-hidden="true">
+                                    <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.47,9.801,30.398c9.529,6.926,22.44,6.897,31.94-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.61-147.54L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <div class="title">${i.snippet.title.replace(/ - Topic$/, "")}</div>
-                        <div class="duration">--:--</div>
-                        <button class="favorite-btn" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
-                            <svg viewBox="0 0 512 512" aria-hidden="true">
-                                <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.47,9.801,30.398c9.529,6.926,22.44,6.897,31.94-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.61-147.54L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             const videos = items.filter(i => i.id.kind === 'youtube#video');
             if (videos.length > 0) {
                 html += `<div class="section-label">${videoFlag}S</div>`;
-                html += videos.map(i => `
-                    <div
-                        class="row"
-                        data-item-type="${videoFlag}"
-                        data-youtube-kind="youtube#video"
-                        data-video-id="${i.id.videoId}"
-                        onclick="playVideo('${i.id.videoId}')"
-                    >
-                        <span class="type-tag">${videoFlag}</span>
-                        <div class="thumb-box">
-                            <img src="${i.snippet.thumbnails.default.url}">
+                html += videos.map(i => {
+                    const videoId = i.id.videoId;
+                    const rawTitle = i.snippet.title || "";
+                    const displayTitle = rawTitle.replace(/ - Topic$/, "");
+                    const thumbUrl = i.snippet.thumbnails?.default?.url || "";
+                    const duration = durationMap[videoId] || "--:--";
+                    const saveId = createPlaylistItemId({ videoId });
+                    const savedClass = isPlaylistItemSaved(saveId) ? " active" : "";
+
+                    return `
+                        <div
+                            class="row"
+                            data-item-type="${videoFlag}"
+                            data-youtube-kind="youtube#video"
+                            data-video-id="${escapeHtml(videoId)}"
+                            onclick="playVideo('${escapeJsString(videoId)}')"
+                        >
+                            <span class="type-tag">${videoFlag}</span>
+                            <div class="thumb-box">
+                                <img src="${escapeHtml(thumbUrl)}">
+                            </div>
+                            <div class="title">${escapeHtml(displayTitle)}</div>
+                            <div class="duration">${escapeHtml(duration)}</div>
+                            <button class="favorite-btn${savedClass}" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
+                                <svg viewBox="0 0 512 512" aria-hidden="true">
+                                    <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.47,9.801,30.398c9.529,6.926,22.44,6.897,31.94-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.61-147.54L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <div class="title">${i.snippet.title.replace(/ - Topic$/, "")}</div>
-                        <div class="duration">${durationMap[i.id.videoId] || "--:--"}</div>
-                        <button class="favorite-btn" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
-                            <svg viewBox="0 0 512 512" aria-hidden="true">
-                                <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.47,9.801,30.398c9.529,6.926,22.44,6.897,31.94-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.61-147.54L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             inner.innerHTML = html;
@@ -1938,6 +2446,7 @@
         async function loadAlbum(playlistId, title) {
             const status = document.getElementById('status');
             if (status) status.innerText = "";
+
             const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${API_KEY}`;
             const res = await fetch(url);
             const data = await res.json();
@@ -1949,28 +2458,38 @@
 
             const videoFlag = getVideoFlag();
 
-            let html = `<div class="section-label">${title.replace(/ - Topic$/, "")}</div>`;
-            html += data.items.map(i => `
-                <div
-                    class="row"
-                    data-item-type="${videoFlag}"
-                    data-youtube-kind="youtube#video"
-                    data-video-id="${i.snippet.resourceId.videoId}"
-                    onclick="playVideo('${i.snippet.resourceId.videoId}')"
-                >
-                    <span class="type-tag">${videoFlag}</span>
-                    <div class="thumb-box">
-                        <img src="${i.snippet.thumbnails.default.url}">
+            let html = `<div class="section-label">${escapeHtml(title.replace(/ - Topic$/, ""))}</div>`;
+            html += data.items.map(i => {
+                const videoId = i.snippet.resourceId.videoId;
+                const rawTitle = i.snippet.title || "";
+                const thumbUrl = i.snippet.thumbnails?.default?.url || "";
+                const duration = durationMap[videoId] || "--:--";
+                const saveId = createPlaylistItemId({ videoId });
+                const savedClass = isPlaylistItemSaved(saveId) ? " active" : "";
+
+                return `
+                    <div
+                        class="row"
+                        data-item-type="${videoFlag}"
+                        data-youtube-kind="youtube#video"
+                        data-video-id="${escapeHtml(videoId)}"
+                        onclick="playVideo('${escapeJsString(videoId)}')"
+                    >
+                        <span class="type-tag">${videoFlag}</span>
+                        <div class="thumb-box">
+                            <img src="${escapeHtml(thumbUrl)}">
+                        </div>
+                        <div class="title">${escapeHtml(rawTitle)}</div>
+                        <div class="duration">${escapeHtml(duration)}</div>
+                        <button class="favorite-btn${savedClass}" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
+                            <svg viewBox="0 0 512 512" aria-hidden="true">
+                                <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.470,9.801,30.398c9.529,6.926,22.44,6.897,31.940-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.610-147.540L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="title">${i.snippet.title}</div>
-                    <div class="duration">${durationMap[i.snippet.resourceId.videoId] || "--:--"}</div>
-                    <button class="favorite-btn" type="button" onclick="toggleFavorite(event, this)" aria-label="Add to playlist" title="Add to playlist">
-                        <svg viewBox="0 0 512 512" aria-hidden="true">
-                            <path d="M510.698,196.593c-3.61-11.2-14.034-18.795-25.794-18.795H329.21L281.791,30.155c-3.599-11.2-14.018-18.808-25.791-18.808c-11.772,0-22.192,7.608-25.791,18.808l-47.418,147.642H27.097c-11.761,0-22.185,7.594-25.795,18.795c-3.599,11.2,0.436,23.449,9.999,30.302l126.246,90.643l-48.598,147.54c-3.694,11.193,0.278,23.47,9.801,30.398c9.529,6.926,22.44,6.897,31.94-0.058L256,403.594l125.312,91.824c9.5,6.956,22.411,6.985,31.941,0.058c9.522-6.927,13.494-19.205,9.811-30.398l-48.61-147.54L500.7,226.895C510.262,220.042,514.298,207.792,510.698,196.593z"></path>
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
             document.getElementById('list-inner').innerHTML = html;
 
             if (status) status.innerText = "";
@@ -2005,8 +2524,6 @@
         function toggleFavorite(event, el) {
             event.stopPropagation();
 
-            el.classList.toggle('active');
-
             const row = el.closest('.row');
             if (!row) return;
 
@@ -2015,17 +2532,32 @@
             const videoId = row.getAttribute('data-video-id') || "";
             const playlistId = row.getAttribute('data-playlist-id') || "";
             const titleEl = row.querySelector('.title');
-            const title = titleEl ? titleEl.textContent.trim() : "";
+            const thumbEl = row.querySelector('.thumb-box img');
+            const durationEl = row.querySelector('.duration');
 
-            const favoriteItem = {
+            const itemData = {
                 itemType,
                 youtubeKind,
                 videoId,
                 playlistId,
-                title
+                title: titleEl ? titleEl.textContent.trim() : "",
+                thumbUrl: thumbEl ? thumbEl.getAttribute('src') : "",
+                duration: durationEl ? durationEl.textContent.trim() : ""
             };
 
-            console.log("FAVORITE_ITEM_PENDING", favoriteItem);
+            const id = createPlaylistItemId(itemData);
+
+            if (isPlaylistItemSaved(id)) {
+                el.classList.add('active');
+                return;
+            }
+
+            const added = addPlaylistItem(itemData);
+
+            if (added) {
+                el.classList.add('active');
+                renderPlaylistItems();
+            }
         }
 
         function hidePlayerInitialState() {
