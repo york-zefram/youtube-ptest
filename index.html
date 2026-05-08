@@ -2109,6 +2109,7 @@
             if (!item || !item.videoId) return;
 
             playVideo(item.videoId);
+            closePlaylistLayer();
         }
 
         function handlePlaylistBack() {
@@ -2298,6 +2299,7 @@
             if (!videoId) return;
 
             playVideo(videoId);
+            closePlaylistLayer();
         }
 
         
