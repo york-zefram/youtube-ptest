@@ -431,6 +431,173 @@
             background: var(--bg);
         }
 
+        .playlist-toolbar {
+            width: 100%;
+            height: 58px;
+            min-height: 58px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(180px, 280px);
+            gap: 14px;
+            align-items: center;
+            padding: 0 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        .playlist-tabs {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .playlist-tabs::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+
+        .playlist-tab {
+            flex: 0 0 auto;
+            min-width: 92px;
+            height: 30px;
+            padding: 0 14px;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            background: var(--control-bg);
+            color: var(--muted);
+            font-size: 0.62rem;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .playlist-tab.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .playlist-search-wrap {
+            width: 100%;
+            min-width: 0;
+            height: 30px;
+        }
+
+        .playlist-search-input {
+            width: 100%;
+            height: 30px;
+            min-height: 30px;
+            padding: 0 14px;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            background: var(--control-bg);
+            color: var(--text);
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
+            font-size: 0.78rem;
+            outline: none;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .playlist-search-input::placeholder {
+            color: var(--muted);
+            opacity: 0.75;
+        }
+
+        .playlist-search-input:focus {
+            border-color: var(--accent);
+        }
+
+
+
+        .playlist-list {
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--bg);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .playlist-list::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+
+        .playlist-list::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        .playlist-list-inner {
+            min-height: 100%;
+            padding: 0 15px 50px 15px;
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        .playlist-empty-state {
+            min-height: calc(100vh - 50px - 58px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            text-align: center;
+            letter-spacing: 0.08em;
+            box-sizing: border-box;
+        }
+
+        .playlist-empty-title {
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: bold;
+            letter-spacing: 0.18em;
+            margin-bottom: 12px;
+        }
+
+        .playlist-empty-text {
+            color: var(--muted);
+            font-size: 0.68rem;
+            line-height: 1.8;
+            letter-spacing: 0.06em;
+        }
+
+        @media (max-width: 980px) {
+            .playlist-toolbar {
+                height: 96px;
+                min-height: 96px;
+                grid-template-columns: 1fr;
+                grid-template-rows: 30px 30px;
+                gap: 10px;
+                padding: 14px;
+            }
+
+            .playlist-tabs {
+                width: 100%;
+            }
+
+            .playlist-tab {
+                min-width: 86px;
+            }
+
+            .playlist-search-wrap {
+                width: 100%;
+            }
+        }
+
         /* 共通パーツ */
         #setup-overlay {
             position: fixed;
@@ -863,7 +1030,34 @@
             <div class="playlist-header-right"></div>
         </div>
 
-        <div class="playlist-body-placeholder"></div>
+        <div class="playlist-toolbar">
+            <div class="playlist-tabs">
+                <button class="playlist-tab active" type="button" data-playlist-tab="album" onclick="setPlaylistTab('album')">ALBUM</button>
+                <button class="playlist-tab" type="button" data-playlist-tab="song" onclick="setPlaylistTab('song')">SONG</button>
+                <button class="playlist-tab" type="button" data-playlist-tab="lists" onclick="setPlaylistTab('lists')">LISTS</button>
+                <button class="playlist-tab" type="button" data-playlist-tab="videos" onclick="setPlaylistTab('videos')">VIDEOS</button>
+            </div>
+
+            <div class="playlist-search-wrap">
+                <input
+                    id="playlist-search-input"
+                    class="playlist-search-input"
+                    type="text"
+                    placeholder="Search"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+            </div>
+        </div>
+
+        <div class="playlist-list">
+            <div class="playlist-list-inner" id="playlist-list-inner">
+                <div class="playlist-empty-state">
+                    <div class="playlist-empty-title">NO ITEMS</div>
+                    <div class="playlist-empty-text">Use the star icon to add items.</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="setup-overlay">
@@ -1300,6 +1494,16 @@
             saveSession();
         }
 
+
+        let currentPlaylistTab = "album";
+
+        function setPlaylistTab(tab) {
+            currentPlaylistTab = tab;
+
+            document.querySelectorAll('.playlist-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-playlist-tab') === tab);
+            });
+        }
 
         function openPlaylistLayer() {
             const layer = document.getElementById('playlist-layer');
