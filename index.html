@@ -349,8 +349,8 @@
             pointer-events: none;
             visibility: hidden;
             transition:
-                opacity 0.42s ease,
-                visibility 0s linear 0.42s;
+                opacity 0.62s ease,
+                visibility 0s linear 0.62s;
         }
 
         #playlist-layer.active {
@@ -358,7 +358,7 @@
             pointer-events: auto;
             visibility: visible;
             transition:
-                opacity 0.42s ease,
+                opacity 0.62s ease,
                 visibility 0s linear 0s;
         }
 
@@ -707,8 +707,8 @@
             visibility: hidden;
             pointer-events: none;
             transition:
-                opacity 0.42s ease,
-                visibility 0s linear 0.42s;
+                opacity 0.62s ease,
+                visibility 0s linear 0.62s;
         }
 
         #playlist-detail-view.active {
@@ -716,7 +716,7 @@
             visibility: visible;
             pointer-events: auto;
             transition:
-                opacity 0.42s ease,
+                opacity 0.62s ease,
                 visibility 0s linear 0s;
         }
 
@@ -2151,12 +2151,7 @@
             }
 
             if (inner) {
-                inner.innerHTML = `
-                    <div class="playlist-empty-state">
-                        <div class="playlist-empty-title">LOADING</div>
-                        <div class="playlist-empty-text">Loading titles...</div>
-                    </div>
-                `;
+                inner.innerHTML = "";
             }
 
             if (detailView) {
