@@ -334,6 +334,103 @@
             fill: var(--accent);
         }
 
+
+        /* PLAYLIST LAYER */
+        #playlist-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition:
+                opacity 0.42s ease,
+                visibility 0s linear 0.42s;
+        }
+
+        #playlist-layer.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+            transition:
+                opacity 0.42s ease,
+                visibility 0s linear 0s;
+        }
+
+        .playlist-header {
+            width: 100%;
+            height: 50px;
+            min-height: 50px;
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        .playlist-header-left {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 14px;
+            box-sizing: border-box;
+        }
+
+        .playlist-header-center {
+            text-align: center;
+            color: var(--accent);
+            font-family: "Michroma", sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .playlist-header-right {
+            min-width: 0;
+        }
+
+        .playlist-back-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: none;
+            background: none;
+            color: var(--text);
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .playlist-back-btn:hover {
+            color: var(--accent);
+        }
+
+        .playlist-back-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .playlist-body-placeholder {
+            flex: 1 1 0;
+            min-height: 0;
+            background: var(--bg);
+        }
+
         /* 共通パーツ */
         #setup-overlay {
             position: fixed;
@@ -747,6 +844,26 @@
             </svg>
         </div>
         </div>
+    </div>
+
+
+    <div id="playlist-layer">
+        <div class="playlist-header">
+            <div class="playlist-header-left">
+                <button class="playlist-back-btn" type="button" onclick="closePlaylistLayer()" aria-label="Back to Home">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="playlist-header-center">PLAYLIST</div>
+
+            <div class="playlist-header-right"></div>
+        </div>
+
+        <div class="playlist-body-placeholder"></div>
     </div>
 
     <div id="setup-overlay">
@@ -1183,6 +1300,29 @@
             saveSession();
         }
 
+
+        function openPlaylistLayer() {
+            const layer = document.getElementById('playlist-layer');
+            if (!layer) return;
+
+            layer.classList.add('active');
+        }
+
+        function closePlaylistLayer() {
+            const layer = document.getElementById('playlist-layer');
+            if (!layer) return;
+
+            layer.classList.remove('active');
+
+            currentBottomMode = "";
+
+            document.querySelectorAll('.bottom-menu-icon').forEach(icon => {
+                icon.classList.remove('active');
+            });
+
+            saveSession();
+        }
+
         function setBottomMode(mode) {
             currentBottomMode = mode;
 
@@ -1193,6 +1333,10 @@
                     icon.classList.add('active');
                 }
             });
+
+            if (mode === 'playlist') {
+                openPlaylistLayer();
+            }
 
             saveSession();
         }
