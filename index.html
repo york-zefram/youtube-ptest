@@ -691,6 +691,163 @@
             color: var(--accent);
         }
 
+
+
+        /* PLAYLIST DETAIL VIEW */
+        #playlist-detail-view {
+            position: absolute;
+            inset: 50px 0 0 0;
+            z-index: 8;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition:
+                opacity 0.42s ease,
+                visibility 0s linear 0.42s;
+        }
+
+        #playlist-detail-view.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition:
+                opacity 0.42s ease,
+                visibility 0s linear 0s;
+        }
+
+        .playlist-detail-toolbar {
+            width: 100%;
+            height: 58px;
+            min-height: 58px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(180px, 280px);
+            gap: 14px;
+            align-items: center;
+            padding: 0 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        .playlist-breadcrumb {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.68rem;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .playlist-breadcrumb button {
+            border: none;
+            background: transparent;
+            color: var(--accent);
+            font: inherit;
+            font-weight: bold;
+            letter-spacing: inherit;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .playlist-breadcrumb button:hover {
+            color: var(--text);
+        }
+
+        .playlist-breadcrumb span {
+            flex: 0 0 auto;
+        }
+
+        .playlist-breadcrumb-title {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text);
+        }
+
+        .playlist-detail-search-wrap {
+            width: 100%;
+            min-width: 0;
+            height: 30px;
+        }
+
+        .playlist-detail-search-input {
+            width: 100%;
+            height: 30px;
+            min-height: 30px;
+            padding: 0 14px;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            background: var(--control-bg);
+            color: var(--text);
+            font-family: Inter, sans-serif, "Helvetica Neue", Arial;
+            font-size: 0.78rem;
+            outline: none;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .playlist-detail-search-input::placeholder {
+            color: var(--muted);
+            opacity: 0.75;
+        }
+
+        .playlist-detail-search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .playlist-detail-list {
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--bg);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .playlist-detail-list::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+
+        .playlist-detail-list::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        .playlist-detail-list-inner {
+            min-height: 100%;
+            padding: 0 15px 50px 15px;
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        .playlist-detail-row {
+            width: 100%;
+            min-height: 62px;
+            max-height: 72px;
+            display: grid;
+            grid-template-columns: 54px 56px minmax(0, 1fr) 54px;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--text);
+            box-sizing: border-box;
+            overflow: hidden;
+            cursor: pointer;
+        }
         .playlist-delete-modal {
             position: fixed;
             inset: 0;
@@ -801,6 +958,26 @@
         }
 
         /* 共通パーツ */
+
+
+        @media (max-width: 980px) {
+            .playlist-detail-toolbar {
+                height: 96px;
+                min-height: 96px;
+                grid-template-columns: 1fr;
+                grid-template-rows: 30px 30px;
+                gap: 10px;
+                padding: 14px;
+            }
+
+            .playlist-breadcrumb {
+                width: 100%;
+            }
+
+            .playlist-detail-search-wrap {
+                width: 100%;
+            }
+        }
         #setup-overlay {
             position: fixed;
             inset: 0;
@@ -1219,7 +1396,7 @@
     <div id="playlist-layer">
         <div class="playlist-header">
             <div class="playlist-header-left">
-                <button class="playlist-back-btn" type="button" onclick="closePlaylistLayer()" aria-label="Back to Home">
+                <button class="playlist-back-btn" type="button" onclick="handlePlaylistBack()" aria-label="Back to Home">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -1276,6 +1453,39 @@
                 <div class="playlist-empty-state">
                     <div class="playlist-empty-title">NO ITEMS</div>
                     <div class="playlist-empty-text">Use the star icon to add items.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="playlist-detail-view">
+            <div class="playlist-detail-toolbar">
+                <div class="playlist-breadcrumb">
+                    <button type="button" onclick="closePlaylistDetail()">PLAYLIST</button>
+                    <span>/</span>
+                    <span id="playlist-detail-type">ALBUM</span>
+                    <span>/</span>
+                    <span id="playlist-detail-title" class="playlist-breadcrumb-title">TITLE</span>
+                </div>
+
+                <div class="playlist-detail-search-wrap">
+                    <input
+                        id="playlist-detail-search-input"
+                        class="playlist-detail-search-input"
+                        type="text"
+                        placeholder="Search"
+                        autocomplete="off"
+                        spellcheck="false"
+                        oninput="renderPlaylistDetail()"
+                    >
+                </div>
+            </div>
+
+            <div class="playlist-detail-list">
+                <div id="playlist-detail-list-inner" class="playlist-detail-list-inner">
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">NO ITEMS</div>
+                        <div class="playlist-empty-text">Select an album or list.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1744,6 +1954,9 @@
 
         let currentPlaylistTab = "album";
         let selectedPlaylistDeleteIds = [];
+        let currentPlaylistDetailItem = null;
+        let currentPlaylistView = "list";
+        let currentPlaylistDetailRows = [];
 
         function escapeHtml(value) {
             return String(value || "")
@@ -1860,9 +2073,11 @@
                 const safeDuration = escapeHtml(item.duration || "");
                 const safeType = escapeHtml(item.itemType || "");
                 const safeId = escapeJsString(item.id);
+                const isDetailItem = item.itemType === "ALBUM" || item.itemType === "LIST";
+                const rowClick = isDetailItem ? `onclick="openPlaylistDetail('${safeId}')"` : `onclick="playPlaylistItem('${safeId}')"`;
 
                 return `
-                    <div class="playlist-row" data-playlist-id="${escapeHtml(item.id)}">
+                    <div class="playlist-row" data-playlist-id="${escapeHtml(item.id)}" ${rowClick}>
                         <span class="type-tag">${safeType}</span>
 
                         <div class="thumb-box">
@@ -1889,7 +2104,209 @@
             updatePlaylistTrashState();
         }
 
-        function togglePlaylistDeleteSelect(event, id, el) {
+        function playPlaylistItem(id) {
+            const item = getPlaylistItems().find(entry => entry.id === id);
+            if (!item || !item.videoId) return;
+
+            playVideo(item.videoId);
+        }
+
+        function handlePlaylistBack() {
+            if (currentPlaylistView === "detail") {
+                closePlaylistDetail();
+                return;
+            }
+
+            closePlaylistLayer();
+        }
+
+        function openPlaylistDetail(id) {
+            const item = getPlaylistItems().find(entry => entry.id === id);
+            if (!item) return;
+
+            if (item.itemType !== "ALBUM" && item.itemType !== "LIST") {
+                return;
+            }
+
+            currentPlaylistDetailItem = item;
+            currentPlaylistView = "detail";
+            currentPlaylistDetailRows = [];
+
+            const detailView = document.getElementById('playlist-detail-view');
+            const typeEl = document.getElementById('playlist-detail-type');
+            const titleEl = document.getElementById('playlist-detail-title');
+            const searchInput = document.getElementById('playlist-detail-search-input');
+            const inner = document.getElementById('playlist-detail-list-inner');
+
+            if (typeEl) {
+                typeEl.textContent = item.itemType === "ALBUM" ? "ALBUM" : "LISTS";
+            }
+
+            if (titleEl) {
+                titleEl.textContent = item.title || "";
+            }
+
+            if (searchInput) {
+                searchInput.value = "";
+            }
+
+            if (inner) {
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">LOADING</div>
+                        <div class="playlist-empty-text">Loading titles...</div>
+                    </div>
+                `;
+            }
+
+            if (detailView) {
+                detailView.classList.add('active');
+            }
+
+            loadPlaylistDetailItems(item);
+        }
+
+        function closePlaylistDetail() {
+            const detailView = document.getElementById('playlist-detail-view');
+
+            if (detailView) {
+                detailView.classList.remove('active');
+            }
+
+            currentPlaylistDetailItem = null;
+            currentPlaylistView = "list";
+            currentPlaylistDetailRows = [];
+        }
+
+        async function loadPlaylistDetailItems(item) {
+            const inner = document.getElementById('playlist-detail-list-inner');
+            if (!inner || !item) return;
+
+            if (!API_KEY) {
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">API KEY REQUIRED</div>
+                        <div class="playlist-empty-text">Set your API key to view this list.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!item.playlistId) {
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">NO LIST DATA</div>
+                        <div class="playlist-empty-text">This item has no playlist ID.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${item.playlistId}&maxResults=50&key=${API_KEY}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const rawItems = Array.isArray(data.items) ? data.items : [];
+
+                const videoIds = rawItems
+                    .map(entry => entry.snippet?.resourceId?.videoId)
+                    .filter(Boolean)
+                    .join(',');
+
+                let durationMap = {};
+
+                if (videoIds) {
+                    const dRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${API_KEY}`);
+                    const dData = await dRes.json();
+                    const durationItems = Array.isArray(dData.items) ? dData.items : [];
+
+                    durationItems.forEach(entry => {
+                        durationMap[entry.id] = parseDuration(entry.contentDetails.duration);
+                    });
+                }
+
+                const detailType = item.itemType === "ALBUM" ? "SONG" : "VIDEO";
+
+                currentPlaylistDetailRows = rawItems.map(entry => {
+                    const videoId = entry.snippet?.resourceId?.videoId || "";
+                    const title = entry.snippet?.title || "";
+                    const thumbUrl = entry.snippet?.thumbnails?.default?.url || "";
+                    const duration = durationMap[videoId] || "--:--";
+
+                    return {
+                        videoId,
+                        title,
+                        thumbUrl,
+                        duration,
+                        itemType: detailType
+                    };
+                });
+
+                renderPlaylistDetail();
+            } catch (e) {
+                console.error("Failed to load playlist detail", e);
+
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">LOAD FAILED</div>
+                        <div class="playlist-empty-text">Unable to load this list.</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderPlaylistDetail() {
+            const inner = document.getElementById('playlist-detail-list-inner');
+            if (!inner) return;
+
+            const keywordInput = document.getElementById('playlist-detail-search-input');
+            const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : "";
+
+            const filteredRows = currentPlaylistDetailRows.filter(row => {
+                return !keyword || String(row.title || "").toLowerCase().includes(keyword);
+            });
+
+            if (filteredRows.length === 0) {
+                inner.innerHTML = `
+                    <div class="playlist-empty-state">
+                        <div class="playlist-empty-title">NO ITEMS</div>
+                        <div class="playlist-empty-text">No matching titles.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            inner.innerHTML = filteredRows.map(row => {
+                const safeTitle = escapeHtml(row.title || "");
+                const safeThumb = escapeHtml(row.thumbUrl || "");
+                const safeDuration = escapeHtml(row.duration || "");
+                const safeType = escapeHtml(row.itemType || "");
+                const safeVideoId = escapeJsString(row.videoId || "");
+
+                return `
+                    <div class="playlist-detail-row" onclick="playVideoFromPlaylistDetail('${safeVideoId}')">
+                        <span class="type-tag">${safeType}</span>
+
+                        <div class="thumb-box">
+                            ${safeThumb ? `<img src="${safeThumb}" alt="">` : ""}
+                        </div>
+
+                        <div class="title" title="${safeTitle}">${safeTitle}</div>
+
+                        <div class="duration">${safeDuration || "--:--"}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function playVideoFromPlaylistDetail(videoId) {
+            if (!videoId) return;
+
+            playVideo(videoId);
+        }
+
+        
+function togglePlaylistDeleteSelect(event, id, el) {
             event.stopPropagation();
 
             const index = selectedPlaylistDeleteIds.indexOf(id);
@@ -1997,7 +2414,16 @@
             const layer = document.getElementById('playlist-layer');
             if (!layer) return;
 
+            currentPlaylistView = "list";
+            currentPlaylistDetailItem = null;
+            currentPlaylistDetailRows = [];
             selectedPlaylistDeleteIds = [];
+
+            const detailView = document.getElementById('playlist-detail-view');
+            if (detailView) {
+                detailView.classList.remove('active');
+            }
+
             layer.classList.add('active');
             renderPlaylistItems();
         }
@@ -2005,6 +2431,15 @@
         function closePlaylistLayer() {
             const layer = document.getElementById('playlist-layer');
             if (!layer) return;
+
+            const detailView = document.getElementById('playlist-detail-view');
+            if (detailView) {
+                detailView.classList.remove('active');
+            }
+
+            currentPlaylistView = "list";
+            currentPlaylistDetailItem = null;
+            currentPlaylistDetailRows = [];
 
             layer.classList.remove('active');
 
