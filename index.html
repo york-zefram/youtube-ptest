@@ -1349,6 +1349,8 @@
         let selectedGenres = [];
         let nextPageToken = "";
         let currentQuery = "";
+        let searchResultsBeforeAlbumHTML = "";
+        let isAlbumDetailView = false;
 
         const SESSION_KEY = 'ZEFRAM_PLAYER_SESSION';
         let currentMediaType = "music";
@@ -2314,6 +2316,8 @@
             if (!isNext) {
                 nextPageToken = "";
                 currentQuery = q;
+                searchResultsBeforeAlbumHTML = "";
+                isAlbumDetailView = false;
             }
 
             saveSession();
@@ -2444,6 +2448,14 @@
         }
 
         async function loadAlbum(playlistId, title) {
+            const listInner = document.getElementById('list-inner');
+
+            if (listInner && !isAlbumDetailView) {
+                searchResultsBeforeAlbumHTML = listInner.innerHTML;
+            }
+
+            isAlbumDetailView = true;
+
             const status = document.getElementById('status');
             if (status) status.innerText = "";
 
@@ -2512,10 +2524,38 @@
             return res.join(':');
         }
 
-        function restoreLastSearch() { 
-            if(lastResultsHTML) {
-                document.getElementById('list-inner').innerHTML = lastResultsHTML;
-                document.getElementById('lst').scrollTop = 0;
+        function restoreLastSearch() {
+            const listInner = document.getElementById('list-inner');
+            const lst = document.getElementById('lst');
+
+            if (!listInner) return;
+
+            if (searchResultsBeforeAlbumHTML) {
+                listInner.innerHTML = searchResultsBeforeAlbumHTML;
+
+                if (lst) {
+                    lst.scrollTop = 0;
+                }
+
+                lastResultsHTML = searchResultsBeforeAlbumHTML;
+                searchResultsBeforeAlbumHTML = "";
+                isAlbumDetailView = false;
+
+                saveCurrentMediaMemory();
+                saveSession();
+                return;
+            }
+
+            if (lastResultsHTML) {
+                listInner.innerHTML = lastResultsHTML;
+
+                if (lst) {
+                    lst.scrollTop = 0;
+                }
+
+                isAlbumDetailView = false;
+
+                saveCurrentMediaMemory();
                 saveSession();
             }
         }
